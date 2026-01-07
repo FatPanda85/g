@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>家電補助與贈品查詢系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --primary: #007AFF; --tax-color: #28a745; --old-color: #fd7e14; --price-color: #ff3b30; --bg: #f5f5f7; }
+        body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        
+        /* 選擇器樣式 */
+        .selector-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-bottom: 10px; }
+        select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-size: 1rem; background: white; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        /* 卡片樣式 */
+        .gift-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; display: flex; box-shadow: 0 4px 12px rgba(0,0,0,0.08); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .gift-img { width: 85px; height: 85px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 1px solid #f0f0f0; flex-shrink: 0; }
+        .gift-info { flex-grow: 1; min-width: 0; }
+        .gift-info h4 { margin: 0 0 6px 0; color: #1d1d1f; font-size: 1.05rem; line-height: 1.4; }
+        .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; word-wrap: break-word; }
+        
+        /* 文字特別樣式 */
+        .price-red { color: var(--price-color); font-weight: 600; }
+
+        /* 按鈕群組 */
+        .action-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .action-btn { padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; border: none; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+        .btn-barcode { background: #555; }
+        .btn-activity { background: var(--primary); }
+        .btn-tax { background: var(--tax-color); }
+        .btn-old { background: var(--old-color); }
+
+        /* 全螢幕遮罩層 */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .close-btn { position: absolute; top: 25px; right: 25px; font-size: 2.2rem; border: none; background: none; color: #333; line-height: 1; }
+        
+        /* 條碼旋轉 (供收銀掃描) */
+        .barcode-wrapper { transform: rotate(90deg); width: 85vh; text-align: center; }
+        #fullBarcode { width: 100%; height: auto; }
+
+        /* QR Code 容器 (供客人掃描) */
+        #qrCodeCanvas { padding: 15px; background: white; border: 2px solid #f0f0f0; border-radius: 12px; }
+        .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
+        .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <div class="selector-container">
+        <select id="categorySelect" onchange="updateBrands()">
+            <option value="">-- 1. 選擇分類 (冷氣/常用條碼) --</option>
+        </select>
+        <select id="brandSelect" onchange="showGifts()" disabled>
+            <option value="">-- 2. 選擇品牌/項目 --</option>
+        </select>
+    </div>
+
+    <div id="giftContainer"></div>
+
+    <div id="imgOverlay" class="overlay" onclick="this.style.display='none'">
+        <button class="close-btn">&times;</button>
+        <img id="zoomedImg" style="max-width:95%; max-height:80%; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <p style="margin-top:20px; color:#666;">點擊螢幕關閉</p>
+    </div>
+
+    <div id="barcodeOverlay" class="overlay">
+        <button class="close-btn" onclick="closeOverlay('barcodeOverlay')">&times;</button>
+        <div class="barcode-wrapper">
+            <svg id="fullBarcode"></svg>
+        </div>
+        <p class="hint-text">請向收銀員出示條碼進行結帳</p>
+    </div>
+
+    <div id="qrCodeOverlay" class="overlay">
+        <button class="close-btn" onclick="closeOverlay('qrCodeOverlay')">&times;</button>
+        <div id="qrTitle" class="qr-title"></div>
+        <div id="qrCodeCanvas"></div>
+        <p id="qrHint" class="hint-text"></p>
+    </div>
+
+    <script>
+        // --- 完整資料區塊 ---
+        const rawData = [
+            // --- 常用條碼 ---
+            { 
+                cat: "常用條碼", brand: "冷氣運費", 
+                name: "免基本安裝費\n$100", 
+                desc: "一對一分離式冷氣:  \n 3.6KW以下(含)$3,100元  3.7KW - 4.1KW $3,500元 \n  4.2KW - 5.2KW $3,900元   \n 5.3KW - 6.5KW $4,500元     6.6KW - 7.2KW $5,000元  \n   7.3KW - 9.1KW $6,000元  \n  9.2KW - 11.6KW $8,000元   11.7KW以上$9,200元  \n  一對多分離式冷氣:   \n  超出10米以外(以室內機KW計算)   \n 家樂福補助10米(日立冷氣除外)$5,000元   \n  窗型/直立式冷氣/移動式:  \n 3.2KW(含)以下$800元     3.21KW - 5.3KW $1,000元   \n  超過5.3KW $1,200元  \n  只送不裝收費: \n 窗型/直立式 $200/台   一對一分離 $300/組 \n一對二分離式 $400/組   \n 隨貨其他商品100/件", 
+                barcode: "2449405007012", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+            { 
+                cat: "常用條碼", brand: "冰箱運費", 
+                name: "49-400006-001\n免費運費$10", 
+                desc: "100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1,200\nLG敲敲看冰箱$1,500\n電子衣櫥$600\n1.拆大門/市內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+                barcode: "2449400006027", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+           { 
+                cat: "常用條碼", brand: "冰箱運費", 
+                name: "49-400002-001\n收費運費$10", 
+                desc: "100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1,200\nLG敲敲看冰箱$1,500\n電子衣櫥$600\n1.拆大門/市內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+                barcode: "2449400002029", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+      { 
+                cat: "常用條碼", brand: "洗衣機運費", 
+                name: "49-401006-001\n免費運費$10", 
+                desc: "12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/市內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+                barcode: "2449401006026", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+      { 
+                cat: "常用條碼", brand: "洗衣機運費", 
+                name: "49-401002-001\n收費運費$10", 
+                desc: "12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/市內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+                barcode: "2449401002028", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+      { 
+                cat: "常用條碼", brand: "電視運費", 
+                name: "49-440007-001\n免費運費$10", 
+                desc: "電視32吋吋以下$300\n 電視33-49吋$450\n 電視50-54吋$550\n 電視55-59吋$600\n 電視60-74吋$700\n電視75吋以上$1300", 
+                barcode: "2449440007022", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+      { 
+                cat: "常用條碼", brand: "電視運費", 
+                name: "49-440003-001\n收費運費$10", 
+                desc: "電視32吋吋以下$300\n 電視33-49吋$450\n 電視50-54吋$550\n 電視55-59吋$600\n 電視60-74吋$700\n電視75吋以上$1300", 
+                barcode: "2449440003024", // 請換成正確條碼
+                img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
+            },
+            // --- 家電資料 ---
+            { 
+                cat: "冷氣", brand: "大金", 
+                name: "活動已截止", 
+                desc: "活動已至2025/12/31截止", 
+                barcode: "", img: "", qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            { 
+                cat: "冷氣", brand: "國際", 
+                name: "K系列1-1變頻分離\nUX/UJ/LJ系列\n原廠回饋$1000", 
+                desc: "國際活動官網申請\n發票: 2025.10.01~2026.01.31\n登錄最晚至 2026.02.26", 
+                barcode: "", 
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=1BDF6A75-E8E3-44F7-89D5-CEEFD41E279D", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            { 
+                cat: "冷氣", brand: "國際", 
+                name: "UX/UJ/VX/LJ變頻冷氣&一對多[冷暖]  \n原廠回饋$2000", 
+                desc: "國際活動官網申請\n發票: 2025.10.01~2026.01.31\n登錄最晚至 2026.02.26", 
+                barcode: "", 
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=1BDF6A75-E8E3-44F7-89D5-CEEFD41E279D", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            { 
+                cat: "冷氣", brand: "國際", 
+                name: "高超效UX[冷專]  \n原廠回饋$3000", 
+                desc: "國際活動官網申請\n發票: 2025.10.01~2026.01.31\n登錄最晚至 2026.02.26", 
+                barcode: "", 
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=1BDF6A75-E8E3-44F7-89D5-CEEFD41E279D", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            { 
+                cat: "冷氣", brand: "國際", 
+                name: "高超效UX[冷暖]  \n原廠回饋$8000", 
+                desc: "國際活動官網申請\n發票: 2025.10.01~2026.01.31\n登錄最晚至 2026.02.26", 
+                barcode: "", 
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=1BDF6A75-E8E3-44F7-89D5-CEEFD41E279D", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            { 
+                cat: "冷氣", brand: "LG", 
+                name: "[變頻冷氣]全系列冷氣1-1分離式冷氣(IDHS/IHP/DDHS/DHPM)\n 2.3kw ~ 5.2kw \n 每組現折$1000", 
+                desc: "LG活動時間2026/1/6 ~ 1/31", 
+                barcode: "", 
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            { 
+                cat: "冷氣", brand: "LG", 
+                name: "[變頻冷氣]全系列冷氣1-1分離式冷氣(IHP/DHP)  \n 6.3kw ~ 9.3kw  \n每組現折$2000", 
+                desc: "LG活動時間2026/1/6 ~ 1/31", 
+                barcode: "", 
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "聲寶", 
+                name: "(贈) 聲寶多功能電蒸鍋\nKA-KA01R", 
+                desc: "2025/10/1 ~ 2026/1/31\n享原廠好禮 4 選 1", 
+                barcode: "4718060386700", 
+                img: "KA10R.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "聲寶", 
+                name: "(贈)Balzano BZ-VC860無線無刷吸塵器 \n 40-630985-001", 
+                desc: "2025/10/1 ~ 2026/1/31 \n 聲寶冬販冷氣活動2.2kw(含)以上一級變頻冷氣機種  \n 享原廠好禮4選一", 
+                barcode: "4711041660356", 
+                img: "VC860.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "聲寶", 
+                name: "(贈)聲寶新格SSK-AC2025 16吋微電腦DC節能立扇  \n 40-630078-001", 
+                desc: "2025/10/1 ~ 2026/1/31 \n 聲寶冬販冷氣活動2.2kw(含)以上一級變頻冷氣機種  \n 享原廠好禮4選一", 
+                barcode: "4718060346568", 
+                img: "AC2025.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "聲寶", 
+                name: "(贈)聲寶新格SRE-AC2025 20L微波爐 \n 40-630080-001", 
+                desc: "2025/10/1 ~ 2026/1/31 \n 聲寶冬販冷氣活動2.2kw(含)以上一級變頻冷氣機種  \n 享原廠好禮4選一", 
+                barcode: "4718060332448", 
+                img: "SRE.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "聲寶", 
+                name: "好禮再加碼冷氣  \n 購買分離式PH/PF/NF系列送7-11現金禮卷$1000", 
+                desc: "2025/10/1 ~ 2026/1/31 \n 聲寶冬販冷氣活動需線上申請", 
+                barcode: "", 
+                img: "", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://event.sampo.com.tw/2025q3-campaign", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "禾聯", 
+                name: "2025(贈)禾聯HDF-16CH510 16吋DC風扇 \n 40-630012-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 禾聯2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4711229593711", 
+                img: "16CH510.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "禾聯", 
+                name: "2025(贈)禾聯HVC-14UL010無線手持吸塵器 \n 40-630017-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 禾聯2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4711229593612", 
+                img: "14UL010.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "禾聯", 
+                name: "2025(贈)禾聯HMO-20MD01T 20L轉盤式微波爐 \n 40-630030-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 禾聯2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4711460501865", 
+                img: "20MD01T.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "禾聯", 
+                name: "禾聯MAB-A01T1網路機上盒 \n 40-630023-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 禾聯2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4710273766416", 
+                img: "A01T1.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "禾聯", 
+                name: "2025(贈)SCZS-115全不鏽鋼電鍋 \n 40-630992-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 禾聯2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4710273765198", 
+                img: "SCZS-115.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "東元", 
+                name: "2025(贈)東元YJ1227CBB IH旋鈕觸控電磁爐 \n 40-630039-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 東元2.8kw(含)以上一級[變頻冷氣]", 
+                barcode: "4718074434817", 
+                img: "1227CB.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "東元", 
+                name: "2025(贈)東元YH1401DNB負離子吹風機 \n 40-630055-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 東元2.8kw(含)以上一級[變頻冷氣]", 
+                barcode: "4718074434824", 
+                img: "1401DNB.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "東元", 
+                name: "2025(贈)東元XA1429BRD 14吋DC立扇 \n 40-630994-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n 東元2.8kw(含)以上一級[變頻冷氣]", 
+                barcode: "4718074480173", 
+                img: "1429BRD.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "SHARP", 
+                name: "(贈)速乾UV烘衣架(YQD-02KW010) \n 40-630988-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n SHARP 2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4710273766393", 
+                img: "YQD.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "SHARP", 
+                name: "(贈)14吋DC直流電風扇(YDF-14AH571) \n 40-630989-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n SHARP 2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4711229593346", 
+                img: "14AH.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "SHARP", 
+                name: "(贈)吹風機(YBH-12QN060) \n 40-630987-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n SHARP 2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4711460502879", 
+                img: "12QN.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冷氣", brand: "SHARP", 
+                name: "2025(贈)山田YWD-06LCM1E迷你順熱開飲機 \n 40-630016-001", 
+                desc: "活動時間2025/10/1 ~ 2026/1/31 \n SHARP 2.3kw(含)以上一級[變頻冷氣]", 
+                barcode: "4710273766683", 
+                img: "06LC.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "日立", 
+                name: "藝思即享卷-居家款或享樂款$5000  \n (需線上申請)", 
+                desc: "2025/10/1 ~ 2026/1/31 (申請截止日2026/2/28) \n 日本製琉璃冰箱  \n RGG670TJ", 
+                barcode: "", 
+                img: "CQQ.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://event.hitachi-homeappliances.com.tw/reg.aspx?id=2094", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "日立", 
+                name: "藝思即享卷-居家款或享樂款$3000  \n (需線上申請)", 
+                desc: "2025/10/1 ~ 2026/1/31 (申請截止日2026/2/28) \n 日本製琉璃冰箱  \n RHW620RJ \n RHW540RJ \n 十字對開琉璃冰箱 \n HR4N9713DFSVA \n HR4N9638ESVAD \n 日本製過熱水蒸氣烘烤微波爐 \n MROBK5000AT \n 日本製滾筒洗脫烘 \n BDSX150JJ \n BDSX150JJR \n BDSX120HJ \n BDSX120HJR \n BDSX115FJ \n BDSX115FJR \n BDSV115GJ \n BDSV115GJR", 
+                barcode: "", 
+                img: "CQQ.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://event.hitachi-homeappliances.com.tw/reg.aspx?id=2094", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "日立", 
+                name: "藝思即享卷-居家款或享樂款$2000  \n (需線上申請)", 
+                desc: "日本製鋼板冰箱 \n RTSF62WJ \n RSF62NJ \nRHSF53NJ \nRHS54TJ \n RHS49NJ \n 過熱水蒸氣烘烤微波爐 \n MROS800AT \n 日本製滾筒洗脫烘 \n BDNX125FH \n BDNX125FHR \n BDSG120JJ \n 兩門下冷凍冰箱 \n HRBN7415DD", 
+                barcode: "", 
+                img: "CQQ.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://event.hitachi-homeappliances.com.tw/reg.aspx?id=2094", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "日立", 
+                name: "藝思即享卷-居家款或享樂款$1000  \n (需線上申請)", 
+                desc: "兩門下冷凍冰箱 \n HRBN5366DF \n HRBN5366DFL \n 蒸氣熱泵式乾衣機 \n TD120XFVEM \n 直立變頻洗衣機 \n SF200ZHV \n LTLH3MVW0T \n LTL12MVW0T \n LTLH3MVJWT", 
+                barcode: "", 
+                img: "CQQ.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://event.hitachi-homeappliances.com.tw/reg.aspx?id=2094", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "聲寶", 
+                name: "2025冰箱(贈)大吉大利6入碗筷禮盒組(R5NC1) \n 40-040032-001", 
+                desc: "2025/11/7 ~ 2026/2/23  \n 聲寶SR-N25D﹑SR-C37D﹑SR-C35GD這三款可送", 
+                barcode: "4717235404041", 
+                img: "R5NC1.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "聲寶", 
+                name: "2025冰箱(贈)聲寶等離子吹風機(R5NC2)\n 40-040033-001", 
+                desc: "2025/11/7 ~ 2026/2/23  \n 聲寶SR-B46D﹑SR-C48D﹑SR-C48DV﹑SR-C48GDV﹑SR-A46GDV﹑SR-B53DV﹑SR-C53GDV  \n 這幾款可送", 
+                barcode: "4718060393623", 
+                img: "R5NC2.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "冰箱", brand: "聲寶", 
+                name: "2025洗衣(贈)德國卡爾 鹽綠款 鑄鐵鍋(R5ND1) \n 40-040031-001", 
+                desc: "2025/11/7 ~ 2026/2/23  \n 聲寶SR-C48GDD﹑SR-C61GDV﹑SR-F61D﹑SR-F61DV \n 這幾款可送", 
+                barcode: "4711420202146", 
+                img: "R5ND1.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "洗衣機", brand: "聲寶", 
+                name: "2025洗衣(贈)聲寶90療癒系拍拍小夜燈(W5NC1)樣式隨機\n 40-130022-001", 
+                desc: "2025/11/7 ~ 2026/2/23  \n 聲寶ES-L14V(G5)﹑ES-L16V(G5)﹑ES-P16DV(P1)﹑ES-B15D﹑ES-B17D \n 這幾款可送", 
+                barcode: "4711630870869", 
+                img: "W5NC1.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "洗衣機", brand: "聲寶", 
+                name: "2025洗衣(贈)德國卡爾 海藍款 鑄鐵鍋(W5NC2) \n 40-130021-001", 
+                desc: "2025/11/7 ~ 2026/2/23  \n 聲寶ES-P17DPS(S1)﹑ES-P19DPS(S1)﹑ES-ND12DH \n 這幾款可送", 
+                barcode: "4711420203686", 
+                img: "W5NC2.JPG", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            { 
+                cat: "洗衣機", brand: "聲寶", 
+                name: "2025洗衣(贈)聲寶90 20吋行李箱(W5ND1)\n 40-130023-001", 
+                desc: "2025/11/7 ~ 2026/2/23  \n 聲寶ES-P17DAS(S1)﹑ES-P19DAS(S1)\n 這幾款可送", 
+                barcode: "4711549752812", img: "W5ND1.JPG", qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            }
+        ];
+
+        const catSelect = document.getElementById('categorySelect');
+        const brandSelect = document.getElementById('brandSelect');
+        const giftContainer = document.getElementById('giftContainer');
+
+        // 初始化分類
+        const categories = [...new Set(rawData.map(d => d.cat))];
+        categories.forEach(c => {
+            const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+            catSelect.appendChild(opt);
+        });
+
+        function updateBrands() {
+            const selectedCat = catSelect.value;
+            brandSelect.innerHTML = '<option value="">-- 2. 選擇品牌/項目 --</option>';
+            giftContainer.innerHTML = '';
+            if (!selectedCat) { brandSelect.disabled = true; return; }
+            const brands = [...new Set(rawData.filter(d => d.cat === selectedCat).map(d => d.brand))];
+            brands.forEach(b => {
+                const opt = document.createElement('option'); opt.value = b; opt.textContent = b;
+                brandSelect.appendChild(opt);
+            });
+            brandSelect.disabled = false;
+        }
+
+        function showGifts() {
+            const selectedCat = catSelect.value;
+            const selectedBrand = brandSelect.value;
+            giftContainer.innerHTML = '';
+            if (!selectedBrand) return;
+
+            rawData.filter(d => d.cat === selectedCat && d.brand === selectedBrand).forEach(g => {
+                // 名稱與說明皆處理換行
+                let formattedName = g.name.replace(/\n/g, '<br>');
+                let formattedDesc = g.desc.replace(/\n/g, '<br>');
+                formattedDesc = formattedDesc.replace(/(\$\d+)/g, '<span class="price-red">$1</span>');
+
+                const card = document.createElement('div');
+                card.className = 'gift-card';
+                card.innerHTML = `
+                    <img src="${g.img}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/80?text=無圖片'">
+                    <div class="gift-info">
+                        <h4>${formattedName}</h4>
+                        <p>${formattedDesc}</p>
+                        <div class="action-btns">
+                            ${g.barcode ? `<button class="action-btn btn-barcode" onclick="zoomBarcode('${g.barcode}')">🛒 結帳條碼</button>` : ''}
+                            ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
+                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入財政部申請退稅')">💰 退稅</button>` : ''}
+                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助申請頁面')">♻️ 補助</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                giftContainer.appendChild(card);
+            });
+        }
+
+        function zoomImg(src) { 
+            if(!src) return;
+            document.getElementById('zoomedImg').src = src; 
+            document.getElementById('imgOverlay').style.display = 'flex'; 
+        }
+        
+        function zoomBarcode(code) {
+            document.getElementById('barcodeOverlay').style.display = 'flex';
+            // 使用 JsBarcode 產生條碼
+            JsBarcode("#fullBarcode", code, { format: "EAN13", width: 4, height: 120, displayValue: true, fontSize: 18 });
+        }
+
+        function showQrCode(url, title, hint) {
+            document.getElementById('qrCodeOverlay').style.display = 'flex';
+            document.getElementById('qrTitle').innerText = title;
+            document.getElementById('qrHint').innerText = hint;
+            const canvas = document.getElementById('qrCodeCanvas');
+            canvas.innerHTML = '';
+            // 使用 qrcode.js 產生 QR Code
+            new QRCode(canvas, { text: url, width: 220, height: 220, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+        }
+
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+</html>
