@@ -9,40 +9,25 @@
     <style>
         :root { --primary: #007AFF; --tax-color: #28a745; --old-color: #fd7e14; --price-color: #ff3b30; --bg: #f5f5f7; }
         body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        
-        /* 選擇器樣式 */
         .selector-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-bottom: 10px; }
         select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-size: 1rem; background: white; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* 卡片樣式 */
         .gift-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; display: flex; box-shadow: 0 4px 12px rgba(0,0,0,0.08); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
         .gift-img { width: 85px; height: 85px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 1px solid #f0f0f0; flex-shrink: 0; }
         .gift-info { flex-grow: 1; min-width: 0; }
         .gift-info h4 { margin: 0 0 6px 0; color: #1d1d1f; font-size: 1.05rem; line-height: 1.4; }
         .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; word-wrap: break-word; }
-        
-        /* 文字特別樣式 */
         .price-red { color: var(--price-color); font-weight: 600; }
-
-        /* 按鈕群組 */
         .action-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
         .action-btn { padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; border: none; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; }
         .btn-barcode { background: #555; }
         .btn-activity { background: var(--primary); }
         .btn-tax { background: var(--tax-color); }
         .btn-old { background: var(--old-color); }
-
-        /* 全螢幕遮罩層 */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .close-btn { position: absolute; top: 25px; right: 25px; font-size: 2.2rem; border: none; background: none; color: #333; line-height: 1; }
-        
-        /* 條碼旋轉 (供收銀掃描) */
         .barcode-wrapper { transform: rotate(90deg); width: 85vh; text-align: center; }
         #fullBarcode { width: 100%; height: auto; }
-
-        /* QR Code 容器 (供客人掃描) */
         #qrCodeCanvas { padding: 15px; background: white; border: 2px solid #f0f0f0; border-radius: 12px; }
         .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
         .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; line-height: 1.4; }
@@ -52,7 +37,7 @@
 
     <div class="selector-container">
         <select id="categorySelect" onchange="updateBrands()">
-            <option value="">-- 1. 選擇分類 (冷氣/常用條碼) --</option>
+            <option value="">-- 1. 選擇分類 --</option>
         </select>
         <select id="brandSelect" onchange="showGifts()" disabled>
             <option value="">-- 2. 選擇品牌/項目 --</option>
@@ -83,9 +68,8 @@
     </div>
 
     <script>
-        // --- 完整資料區塊 ---
         const rawData = [
-            // --- 常用條碼 ---
+         // --- 常用條碼 ---
             { 
                 cat: "常用條碼", brand: "冷氣運費", 
                 name: "免基本安裝費\n$100", 
@@ -472,7 +456,6 @@
         const brandSelect = document.getElementById('brandSelect');
         const giftContainer = document.getElementById('giftContainer');
 
-        // 初始化分類
         const categories = [...new Set(rawData.map(d => d.cat))];
         categories.forEach(c => {
             const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
@@ -499,10 +482,18 @@
             if (!selectedBrand) return;
 
             rawData.filter(d => d.cat === selectedCat && d.brand === selectedBrand).forEach(g => {
-                // 名稱與說明皆處理換行
                 let formattedName = g.name.replace(/\n/g, '<br>');
                 let formattedDesc = g.desc.replace(/\n/g, '<br>');
                 formattedDesc = formattedDesc.replace(/(\$\d+)/g, '<span class="price-red">$1</span>');
+
+                // 動態生成多個條碼按鈕
+                let barcodeBtns = "";
+                if (Array.isArray(g.barcode) && g.barcode.length > 0) {
+                    g.barcode.forEach((code, index) => {
+                        const btnLabel = g.barcode.length > 1 ? `🛒 結帳條碼(${index + 1})` : `🛒 結帳條碼`;
+                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${btnLabel}</button>`;
+                    });
+                }
 
                 const card = document.createElement('div');
                 card.className = 'gift-card';
@@ -512,7 +503,7 @@
                         <h4>${formattedName}</h4>
                         <p>${formattedDesc}</p>
                         <div class="action-btns">
-                            ${g.barcode ? `<button class="action-btn btn-barcode" onclick="zoomBarcode('${g.barcode}')">🛒 結帳條碼</button>` : ''}
+                            ${barcodeBtns}
                             ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
                             ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入財政部申請退稅')">💰 退稅</button>` : ''}
                             ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助申請頁面')">♻️ 補助</button>` : ''}
@@ -523,31 +514,20 @@
             });
         }
 
-        function zoomImg(src) { 
-            if(!src) return;
-            document.getElementById('zoomedImg').src = src; 
-            document.getElementById('imgOverlay').style.display = 'flex'; 
-        }
-        
+        function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
         function zoomBarcode(code) {
             document.getElementById('barcodeOverlay').style.display = 'flex';
-            // 使用 JsBarcode 產生條碼
             JsBarcode("#fullBarcode", code, { format: "EAN13", width: 4, height: 120, displayValue: true, fontSize: 18 });
         }
-
         function showQrCode(url, title, hint) {
             document.getElementById('qrCodeOverlay').style.display = 'flex';
             document.getElementById('qrTitle').innerText = title;
             document.getElementById('qrHint').innerText = hint;
             const canvas = document.getElementById('qrCodeCanvas');
             canvas.innerHTML = '';
-            // 使用 qrcode.js 產生 QR Code
             new QRCode(canvas, { text: url, width: 220, height: 220, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
         }
-
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
 </html>
-
-
