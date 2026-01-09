@@ -9,46 +9,74 @@
     <style>
         :root { --primary: #007AFF; --tax-color: #28a745; --old-color: #fd7e14; --price-color: #ff3b30; --bg: #f5f5f7; }
         body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .selector-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-bottom: 10px; }
-        select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-size: 1rem; background: white; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* 標頭容器 - 固定在上方 */
+        .header-container { position: sticky; top: 0; z-index: 100; background: var(--bg); padding-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* 搜尋列樣式 */
+        .search-row { display: flex; gap: 8px; }
+        .search-box { flex-grow: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--primary); font-size: 1rem; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-search { width: 80px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        /* 下拉選單列 */
+        .selector-row { display: flex; gap: 8px; }
+        select { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-size: 0.9rem; background: white; outline: none; }
+
+        /* 卡片樣式 */
         .gift-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; display: flex; box-shadow: 0 4px 12px rgba(0,0,0,0.08); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .gift-img { width: 85px; height: 85px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 1px solid #f0f0f0; flex-shrink: 0; }
+        
+        .gift-img { width: 90px; height: 90px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 1px solid #eee; flex-shrink: 0; }
         .gift-info { flex-grow: 1; min-width: 0; }
         .gift-info h4 { margin: 0 0 6px 0; color: #1d1d1f; font-size: 1.05rem; line-height: 1.4; }
-        .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; word-wrap: break-word; }
+        .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; }
         .price-red { color: var(--price-color); font-weight: 600; }
+
+        /* 按鈕群組 */
         .action-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .action-btn { padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; border: none; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+        .action-btn { padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; border: none; color: white; cursor: pointer; font-weight: 500; text-align: center; }
         .btn-barcode { background: #555; }
         .btn-activity { background: var(--primary); }
         .btn-tax { background: var(--tax-color); }
         .btn-old { background: var(--old-color); }
+
+        /* 全螢幕遮罩層 */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .close-btn { position: absolute; top: 25px; right: 25px; font-size: 2.2rem; border: none; background: none; color: #333; line-height: 1; }
+        
+        /* 條碼旋轉設定 */
         .barcode-wrapper { transform: rotate(90deg); width: 85vh; text-align: center; }
         #fullBarcode { width: 100%; height: auto; }
+
+        /* QR Code 設定 */
         #qrCodeCanvas { padding: 15px; background: white; border: 2px solid #f0f0f0; border-radius: 12px; }
         .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
-        .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; line-height: 1.4; }
+        .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; }
     </style>
 </head>
 <body>
 
-    <div class="selector-container">
-        <select id="categorySelect" onchange="updateBrands()">
-            <option value="">-- 1. 選擇分類 --</option>
-        </select>
-        <select id="brandSelect" onchange="showGifts()" disabled>
-            <option value="">-- 2. 選擇品牌/項目 --</option>
-        </select>
+    <div class="header-container">
+        <div class="search-row">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 輸入型號 (如: LJ50, K28...)" onkeypress="handleKeyPress(event)">
+            <button class="btn-search" onclick="searchModel()">搜尋</button>
+        </div>
+        
+        <div class="selector-row">
+            <select id="categorySelect" onchange="updateBrands()">
+                <option value="">-- 1. 選擇分類 --</option>
+            </select>
+            <select id="brandSelect" onchange="showGiftsBySelect()" disabled>
+                <option value="">-- 2. 選擇品牌 --</option>
+            </select>
+        </div>
     </div>
 
     <div id="giftContainer"></div>
 
     <div id="imgOverlay" class="overlay" onclick="this.style.display='none'">
         <button class="close-btn">&times;</button>
-        <img id="zoomedImg" style="max-width:95%; max-height:80%; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <img id="zoomedImg" style="max-width:95%; max-height:80%; border-radius:12px;">
         <p style="margin-top:20px; color:#666;">點擊螢幕關閉</p>
     </div>
 
@@ -57,7 +85,7 @@
         <div class="barcode-wrapper">
             <svg id="fullBarcode"></svg>
         </div>
-        <p class="hint-text">請向收銀員出示條碼進行結帳</p>
+        <p class="hint-text">請向收銀員出示條碼</p>
     </div>
 
     <div id="qrCodeOverlay" class="overlay">
@@ -68,9 +96,11 @@
     </div>
 
     <script>
+        // ==========================================
+        // 請將您之前的 rawData 貼在下面這裡
+        // ==========================================
         const rawData = [
-         // --- 常用條碼 ---
-            { 
+       { 
                 cat: "常用條碼", brand: "冷氣運費", 
                 name: "免基本安裝費\n$100", 
                 desc: "一對一分離式冷氣:  \n 3.6KW以下(含)$3100元  3.7KW - 4.1KW $3500元 \n  4.2KW - 5.2KW $3900元   \n 5.3KW - 6.5KW $4500元\n6.6KW - 7.2KW $5000元  \n   7.3KW - 9.1KW $6000元  \n  9.2KW - 11.6KW $8000元  \n 11.7KW以上$9200元  \n  一對多分離式冷氣:   \n  超出10米以外(以室內機KW計算)   \n 家樂福補助10米(日立冷氣除外)$5000元   \n  窗型/直立式冷氣/移動式:  \n 3.2KW(含)以下$800元     3.21KW - 5.3KW $1000元   \n  超過5.3KW $1200元  \n  只送不裝收費: \n 窗型/直立式 $200/台 \n  一對一分離 $300/組 \n一對二分離式 $400/組   \n 隨貨其他商品100/件", 
@@ -704,6 +734,171 @@
                 taxUrl: "", 
                 oldUrl: "" 
             },
+            {
+                cat: "國際感恩有禮賞", brand: "日本製電冰箱無邊框鏡面/玻璃系列F651", 
+                name: "買NR-F651WX送\n40-040003-001(贈)SP-2601德國雙人牌不沾深煎鍋鏟組\n登錄送$5000元節能回饋\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-F651WX",
+                barcode: ["4009839369162","2449400006027","2449400002029"], 
+                img: "F651WX.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=A323DDB8-12A8-42F5-A87A-2A3A6CB766B6", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "日本製電冰箱無邊框鏡面/玻璃系列(其他款)", 
+                name: "買NR-F601WX,NR-F551WX,NR-F521HX送\n40-040003-001(贈)SP-2601德國雙人牌不沾深煎鍋鏟組\n登錄送$3000元節能回饋\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-F601WX,NR-F551WX,NR-F521HX",
+                barcode: ["4009839369162","2449400006027","2449400002029"], 
+                img: "F601WX.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=A323DDB8-12A8-42F5-A87A-2A3A6CB766B6", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "日本製電冰箱鋼板系列", 
+                name: "買NR-F601XT,NR-E507XT,NR-E417XT送\n40-040003-001(贈)SP-2601德國雙人牌不沾深煎鍋鏟組\n登錄送$2000元節能回饋\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-F601XT,NR-E507XT,NR-E417XT",
+                barcode: ["4009839369162","2449400006027","2449400002029"], 
+                img: "F601XT.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=A323DDB8-12A8-42F5-A87A-2A3A6CB766B6", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻電冰箱玻璃系列(400L以上)(日本製除外)(XGS系列)", 
+                name: "買NR-D615XGS,NR-C615XGS,NR-D505XGS,NR-C505XGS,NR-C454HG送\n40-130020-001(贈)SP-2603樂美雅精鐵鑄鐵鍋\n登錄送$3000元節能回饋\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-D615XGS,NR-C615XGS,NR-D505XGS,NR-C505XGS,NR-C454HG",
+                barcode: ["4717879104253","2449400006027","2449400002029"], 
+                img: "D615XGS.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=A323DDB8-12A8-42F5-A87A-2A3A6CB766B6", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻電冰箱玻璃系列(NR-C501PG)", 
+                name: "買NR-C501PG送\n40-130020-001送\n40-130020-001(贈)SP-2603樂美雅精鐵鑄鐵鍋\n登錄送$2000元節能回饋\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-C501PG",
+                barcode: ["4717879104253","2449400006027","2449400002029"], 
+                img: "C501PG.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=A323DDB8-12A8-42F5-A87A-2A3A6CB766B6", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻電冰箱鋼板系列(400L以上)(日本製除外)", 
+                name: "買NR-D615XV,NR-D505XV,NR-C615XV,NR-C505XV,NR-B656TV,NR-B586TV,NR-B496TV,NR-B426TV送\n40-130020-001(贈)SP-2603樂美雅精鐵鑄鐵鍋\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-D615XV,NR-D505XV,NR-C615XV,NR-C505XV,NR-B656TV,NR-B586TV,NR-B496TV,NR-B426TV",
+                barcode: ["4717879104253","2449400006027","2449400002029"], 
+                img: "D615XV.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻電冰箱(400L以下)", 
+                name: "買NR-C384HV,NR-C384HVL,NR-B371TV,NR-B331VG,NR-B301VG送\n40-409990-001(贈)SP-2606德國Othello不鏽鋼保鮮盒\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$100條碼\n第三個是收費$100條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-C384HV,NR-C384HVL,NR-B371TV,NR-B331VG,NR-B301VG",
+                barcode: ["6909141113133","2449400006027","2449400002029"], 
+                img: "C384HV.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
+                oldUrl: "https://save3000.moeaea.gov.tw/subsidy02/index/index.aspx" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "冷凍櫃和乾衣機", 
+                name: "買NR-FZ383AV-S,NR-FZ255AV-S,NR-FZ175AV-S,NH-80RZ-W,NH-70G-L送\n40-040998-001(贈)SP-2607柔膚浴巾保暖毯\n活動至2026/2/26\n第一個條碼是贈品\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+model: "NR-FZ383AV-S,NR-FZ255AV-S,NR-FZ175AV-S,NH-80RZ-W,NH-70G-L",
+                barcode: ["4715754026072","2449400006027","2449400002029"], 
+                img: "FZ383.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "台灣製熱泵滾筒洗衣機", 
+                name: "買NA-V170RPH,NA-V150RPH送\n40-040003-001(贈)SP-2601德國雙人牌不沾深煎鍋鏟組\n40-110176-001(贈)南僑水晶洗劑SP-NA02\n登錄送$3000元節能回饋\n活動至2026/2/26\n第一個條碼是煎鍋鏟組\n第二個是水晶洗劑\n第三個免運$10條碼\n第四個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NA-V170RPH,NA-V150RPH",
+                barcode: ["2448001018019","2449401006026","2449401002028"], 
+                img: "V170RPH.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=DE50DB26-E8B9-48B9-8677-2D156E919B98", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "淨護完美洗烘衣機組", 
+                name: "買NA-VS120RW-B + NH-VS100HP-B(合購)送\n40-040003-001(贈)SP-2601德國雙人牌不沾深煎鍋鏟組\n40-130020-001\n(贈)SP-2603樂美雅精鐵鑄鐵鍋\n40-110176-001(贈)南僑水晶洗劑SP-NA02\n40-130009-001Panasonic N-VS188U-B淨護完美系列專用層\n40-130016-001(贈)淨護堆疊洗乾衣組三通管NA-W002B-T\n登錄送$3000元節能回饋\n活動至2026/2/26\n第一個條碼是煎鍋鏟組\n第二個是鑄鐵鍋\n第三個是水晶洗劑\n第四個是專用層\n第五個是三通管\n第六個免運$10條碼\n第七個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NA-VS120RW-B + NH-VS100HP-B",
+                barcode: ["2448001018019","4717879104253","4710060009153","6924898159043","4717523354041","2449401006026","2449401002028"], 
+                img: "VS120.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=6655BBBA-BB40-4440-A876-1B528C7A80EB", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "熱泵除濕式乾衣機", 
+                name: "買NH-VS100HP-B送\n40-040003-001(贈)SP-2601德國雙人牌不沾深煎鍋鏟組\n活動至2026/2/26\n第一個條碼是煎鍋鏟組\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NH-VS100HP-B",
+                barcode: ["2448001018019","2449401006026","2449401002028"], 
+                img: "VS100HP.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=6655BBBA-BB40-4440-A876-1B528C7A80EB", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻溫水滾筒洗衣機", 
+                name: "買NA-V170MDH,NA-V150MDH送\n40-130020-001(贈)SP-2603樂美雅精鐵鑄鐵鍋\n40-110176-001(贈)南僑水晶洗劑SP-NA02\n登錄送$3000元節能回饋\n活動至2026/2/26\n第一個條碼是鑄鐵鍋\n第二個條碼是水晶洗劑\n第三個免運$10條碼\n第四個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NA-V170MDH,NA-V150MDH",
+                barcode: ["2448001018019","4710060009153","2449401006026","2449401002028"], 
+                img: "V170MDH.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "https://pstw.panasonic.com.tw/SalesEvent/Activity/Add?EventID=DE50DB26-E8B9-48B9-8677-2D156E919B98", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻直立溫水洗衣機", 
+                name: "買NA-V220NMS,NA-V200NMS,NA-V190NM(S),NA-V170NM(S),NA-V150NM(S),NA-VS120RW-B送\n40-130020-001(贈)SP-2603樂美雅精鐵鑄鐵鍋\n40-110176-001(贈)南僑水晶洗劑SP-NA02\n活動至2026/2/26\n第一個條碼是鑄鐵鍋\n第二個條碼是水晶洗劑\n第三個免運$10條碼\n第四個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NA-V220NMS,NA-V200NMS,NA-V190NM(S),NA-V190NM,NA-V170NM(S),NA-V170NM,NA-V150NM(S),NA-V150NM,NA-VS120RW-B",
+                barcode: ["2448001018019","4710060009153","2449401006026","2449401002028"], 
+                img: "V220NMS.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "變頻滾筒洗衣機和變頻直立式洗衣機", 
+                name: "買NA-V190RW,NA-V170SW,NA-V150SW,NA-V190MT(S),NA-V170MT(S),NA-V150MT(S),NA-V130LB(S),NA-V120LBS,NA-V110LB(S)送\n40-130020-001(贈)SP-2603樂美雅精鐵鑄鐵鍋\n活動至2026/2/26\n第一個條碼是鑄鐵鍋\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NA-V190RW,NA-V170SW,NA-V150SW,NA-V190MT(S),NA-V190MT,NA-V170MT(S),NA-V170MT,NA-V150MT(S),NA-V150MT,NA-V130LB(S),NA-V130LB,NA-V120LB,NA-V120LBS,NA-V110LB,NA-V110LB(S)",
+                barcode: ["2448001018019","2449401006026","2449401002028"], 
+                img: "V190RW.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
+            {
+                cat: "國際感恩有禮賞", brand: "非變頻系列洗衣機", 
+                name: "買NA-120EB,NA-110EB,NA-90EB送\n40-040999-001(贈)SP-2606德國Othello不鏽鋼保鮮盒\n活動至2026/2/26\n第一個條碼是保鮮盒\n第二個免運$10條碼\n第三個是收費$10條碼", 
+                desc: "發票日期:2025.10.01~2026.02.26\n登錄為晚時間:2026.03.12\n12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/室內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+model: "NA-120EB,NA-110EB,NA-90EB",
+                barcode: ["6909141113133","2449401006026","2449401002028"], 
+                img: "120EB.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
+                qrUrl: "", 
+                taxUrl: "", 
+                oldUrl: "" 
+            },
             { 
                 cat: "洗衣機", brand: "聲寶", 
                 name: "2025洗衣(贈)聲寶90 20吋行李箱(W5ND1)\n 40-130023-001", 
@@ -712,21 +907,31 @@
                 taxUrl: "", 
                 oldUrl: "" 
             }
+
         ];
+        // ==========================================
 
         const catSelect = document.getElementById('categorySelect');
         const brandSelect = document.getElementById('brandSelect');
         const giftContainer = document.getElementById('giftContainer');
+        const searchInput = document.getElementById('searchInput');
 
+        // 初始化分類下拉選單
         const categories = [...new Set(rawData.map(d => d.cat))];
         categories.forEach(c => {
             const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
             catSelect.appendChild(opt);
         });
 
+        // 監聽 Enter 鍵
+        function handleKeyPress(event) {
+            if (event.key === "Enter") searchModel();
+        }
+
+        // 下拉選單連動：更新品牌
         function updateBrands() {
             const selectedCat = catSelect.value;
-            brandSelect.innerHTML = '<option value="">-- 2. 選擇品牌/項目 --</option>';
+            brandSelect.innerHTML = '<option value="">-- 2. 選擇品牌 --</option>';
             giftContainer.innerHTML = '';
             if (!selectedCat) { brandSelect.disabled = true; return; }
             const brands = [...new Set(rawData.filter(d => d.cat === selectedCat).map(d => d.brand))];
@@ -737,38 +942,62 @@
             brandSelect.disabled = false;
         }
 
-        function showGifts() {
+        // 搜尋型號邏輯 (只搜 model 欄位)
+        function searchModel() {
+            const term = searchInput.value.trim().toUpperCase();
+            if (term === "") { alert("請輸入型號關鍵字"); return; }
+
+            // 重設選單狀態
+            catSelect.value = "";
+            brandSelect.value = "";
+            brandSelect.disabled = true;
+
+            const results = rawData.filter(d => d.model && d.model.toUpperCase().includes(term));
+            
+            if (results.length === 0) {
+                giftContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:30px;">❌ 找不到符合此型號的資料</p>';
+            } else {
+                renderGifts(results);
+            }
+        }
+
+        // 透過選單顯示結果
+        function showGiftsBySelect() {
             const selectedCat = catSelect.value;
             const selectedBrand = brandSelect.value;
-            giftContainer.innerHTML = '';
             if (!selectedBrand) return;
+            searchInput.value = ""; // 清空搜尋框
+            const results = rawData.filter(d => d.cat === selectedCat && d.brand === selectedBrand);
+            renderGifts(results);
+        }
 
-            rawData.filter(d => d.cat === selectedCat && d.brand === selectedBrand).forEach(g => {
+        // 渲染卡片 HTML
+        function renderGifts(data) {
+            giftContainer.innerHTML = '';
+            data.forEach(g => {
                 let formattedName = g.name.replace(/\n/g, '<br>');
-                let formattedDesc = g.desc.replace(/\n/g, '<br>');
-                formattedDesc = formattedDesc.replace(/(\$\d+)/g, '<span class="price-red">$1</span>');
-
-                // 動態生成多個條碼按鈕
+                let formattedDesc = g.desc ? g.desc.replace(/\n/g, '<br>').replace(/(\$\d+)/g, '<span class="price-red">$1</span>') : "";
+                
                 let barcodeBtns = "";
-                if (Array.isArray(g.barcode) && g.barcode.length > 0) {
-                    g.barcode.forEach((code, index) => {
-                        const btnLabel = g.barcode.length > 1 ? `🛒 結帳條碼(${index + 1})` : `🛒 結帳條碼`;
-                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${btnLabel}</button>`;
+                if (Array.isArray(g.barcode)) {
+                    g.barcode.forEach((code, i) => {
+                        const label = g.barcode.length > 1 ? `🛒 條碼(${i+1})` : `🛒 結帳條碼`;
+                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
                     });
                 }
 
                 const card = document.createElement('div');
                 card.className = 'gift-card';
                 card.innerHTML = `
-                    <img src="${g.img}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/80?text=無圖片'">
+                    <img src="${g.img || ''}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/90?text=無圖片'">
                     <div class="gift-info">
                         <h4>${formattedName}</h4>
                         <p>${formattedDesc}</p>
                         <div class="action-btns">
                             ${barcodeBtns}
                             ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入財政部申請退稅')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助申請頁面')">♻️ 補助</button>` : ''}
+                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面')">💰 退稅</button>` : ''}
+                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面')">♻️ 補助</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -793,17 +1022,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
