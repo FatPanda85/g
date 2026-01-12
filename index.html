@@ -1282,7 +1282,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
             renderGifts(results);
         }
 
-        // 渲染卡片 HTML
+// 渲染卡片 HTML
         function renderGifts(data) {
             giftContainer.innerHTML = '';
             data.forEach(g => {
@@ -1296,9 +1296,9 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                         if (!code || code === "") return; 
 
                         // 預設標籤
-                        let label = `🛒 結帳條碼(${i+1})`;
+                        let label = `🛒 條碼(${i+1})`;
 
-                        // 根據分類與品牌自動命名，解決「電視渲染延續」問題
+                        // 修正 DM 尾牙渲染邏輯
                         if (g.cat === "DM尾牙") {
                             if (g.brand.includes("電視")) {
                                 const tvLabels = ["🎁 贈品/保固", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
@@ -1320,7 +1320,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                     });
                 }
 
-                // --- 產生卡片內容 (含活動/退稅/補助) ---
+                // --- 產生卡片內容 (確保 QR Code 按鈕存在) ---
                 const card = document.createElement('div');
                 card.className = 'gift-card';
                 card.innerHTML = `
@@ -1338,40 +1338,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                 `;
                 giftContainer.appendChild(card);
             });
-        }
-
-                // --- 2. 生成卡片內容 (確保 QR Code 按鈕存在) ---
-                const card = document.createElement('div');
-                card.className = 'gift-card';
-                card.innerHTML = `
-                    <img src="${g.img || ''}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/90?text=無圖片'">
-                    <div class="gift-info">
-                        <h4>${formattedName}</h4>
-                        <p>${formattedDesc}</p>
-                        <div class="action-btns">
-                            ${barcodeBtns}
-                            ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面')">♻️ 補助</button>` : ''}
-                        </div>
-                    </div>
-                `;
-                giftContainer.appendChild(card);
-            });
-        }
-                const card = document.createElement('div');
-                card.className = 'gift-card';
-                card.innerHTML = `
-                    <img src="${g.img || ''}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/90?text=無圖片'">
-                    <div class="gift-info">
-                        <h4>${formattedName}</h4>
-                        <p>${formattedDesc}</p>
-                        <div class="action-btns">${barcodeBtns}</div>
-                    </div>
-                `;
-                giftContainer.appendChild(card);
-            });
-        }
+        } // 結束點，後面不要再有其他 } 了
 
         function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
         function zoomBarcode(code) {
@@ -1390,6 +1357,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
