@@ -6,53 +6,170 @@
     <title>家電補助與贈品查詢系統</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <style>
-        :root { --primary: #007AFF; --tax-color: #28a745; --old-color: #fd7e14; --price-color: #ff3b30; --bg: #f5f5f7; }
-        body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        
-        /* 標頭容器 - 固定在上方 */
-        .header-container { position: sticky; top: 0; z-index: 100; background: var(--bg); padding-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
-        
-        /* 搜尋列樣式 */
-        .search-row { display: flex; gap: 8px; }
-        .search-box { flex-grow: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--primary); font-size: 1rem; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-search { width: 80px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+   <style>
+    /* 全域變數設定 */
+    :root { 
+        --primary: #007AFF; 
+        --tax-color: #28a745; 
+        --old-color: #fd7e14; 
+        --price-color: #ff3b30; 
+        --barcode-color: #34495e; /* 深藍灰，更具識別度 */
+        --bg: #f5f5f7; 
+    }
 
-        /* 下拉選單列 */
-        .selector-row { display: flex; gap: 8px; }
-        select { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-size: 0.9rem; background: white; outline: none; }
+    body { 
+        font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        background: var(--bg); 
+        margin: 0; 
+        padding: 15px; 
+    }
+    
+    /* 標頭容器 - 固定在上方 */
+    .header-container { 
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+        background: var(--bg); 
+        padding-bottom: 12px; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 10px; 
+    }
+    
+    /* 搜尋列與下拉選單 */
+    .search-row { display: flex; gap: 8px; }
+    .search-box { 
+        flex-grow: 1; 
+        padding: 12px; 
+        border-radius: 12px; 
+        border: 2px solid var(--primary); 
+        font-size: 1rem; 
+        outline: none; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    }
+    .btn-search { 
+        width: 80px; 
+        background: var(--primary); 
+        color: white; 
+        border: none; 
+        border-radius: 12px; 
+        font-weight: bold; 
+        cursor: pointer; 
+    }
+    .selector-row { display: flex; gap: 8px; }
+    select { 
+        flex: 1; 
+        padding: 12px; 
+        border-radius: 12px; 
+        border: 1px solid #ccc; 
+        font-size: 0.9rem; 
+        background: white; 
+        outline: none; 
+    }
 
-        /* 卡片樣式 */
-        .gift-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; display: flex; box-shadow: 0 4px 12px rgba(0,0,0,0.08); animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .gift-img { width: 90px; height: 90px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 1px solid #eee; flex-shrink: 0; }
-        .gift-info { flex-grow: 1; min-width: 0; }
-        .gift-info h4 { margin: 0 0 6px 0; color: #1d1d1f; font-size: 1.05rem; line-height: 1.4; }
-        .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; }
-        .price-red { color: var(--price-color); font-weight: 600; }
+    /* 卡片與內容佈局 */
+    .gift-card { 
+        background: white; 
+        border-radius: 16px; 
+        padding: 16px; 
+        margin-bottom: 15px; 
+        display: flex; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        animation: fadeIn 0.3s ease; 
+    }
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(5px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    .gift-img { 
+        width: 90px; 
+        height: 90px; 
+        object-fit: cover; 
+        border-radius: 12px; 
+        margin-right: 15px; 
+        border: 1px solid #eee; 
+        flex-shrink: 0; 
+    }
+    .gift-info { flex-grow: 1; min-width: 0; }
+    .gift-info h4 { margin: 0 0 6px 0; color: #1d1d1f; font-size: 1.05rem; line-height: 1.4; }
+    .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; }
+    .price-red { color: var(--price-color); font-weight: 600; }
 
-        /* 按鈕群組 */
-        .action-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .action-btn { padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; border: none; color: white; cursor: pointer; font-weight: 500; text-align: center; }
-        .btn-barcode { background: #555; }
-        .btn-activity { background: var(--primary); }
-        .btn-tax { background: var(--tax-color); }
-        .btn-old { background: var(--old-color); }
+    /* 按鈕區塊 - 核心修改：確保多條碼能自動換行並美化 */
+    .action-btns { 
+        display: flex; 
+        gap: 8px; 
+        margin-top: 12px; 
+        flex-wrap: wrap; /* 重要：讓 DM 尾牙的多個按鈕能自動折行 */
+    }
+    .action-btn { 
+        padding: 10px 14px; 
+        border-radius: 10px; 
+        font-size: 0.85rem; 
+        border: none; 
+        color: white; 
+        cursor: pointer; 
+        font-weight: 600; 
+        text-align: center;
+        transition: transform 0.1s, opacity 0.1s;
+    }
+    .action-btn:active { 
+        transform: scale(0.95); /* 按下去有縮小的回饋感 */
+        opacity: 0.8; 
+    }
 
-        /* 全螢幕遮罩層 */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .close-btn { position: absolute; top: 25px; right: 25px; font-size: 2.2rem; border: none; background: none; color: #333; line-height: 1; }
-        
-        /* 條碼旋轉設定 */
-        .barcode-wrapper { transform: rotate(90deg); width: 85vh; text-align: center; }
-        #fullBarcode { width: 100%; height: auto; }
+    /* 各類別按鈕顏色 */
+    .btn-barcode { background: var(--barcode-color); }
+    .btn-activity { background: var(--primary); }
+    .btn-tax { background: var(--tax-color); }
+    .btn-old { background: var(--old-color); }
 
-        /* QR Code 設定 */
-        #qrCodeCanvas { padding: 15px; background: white; border: 2px solid #f0f0f0; border-radius: 12px; }
-        .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
-        .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; }
-    </style>
+    /* 全螢幕遮罩層 (Overlay) */
+    .overlay { 
+        display: none; 
+        position: fixed; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%; 
+        background: white; 
+        z-index: 1000; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 20px; 
+        box-sizing: border-box; 
+    }
+    .close-btn { 
+        position: absolute; 
+        top: 25px; 
+        right: 25px; 
+        font-size: 2.2rem; 
+        border: none; 
+        background: none; 
+        color: #333; 
+        line-height: 1; 
+        cursor: pointer;
+    }
+    
+    /* 條碼顯示樣式 (橫向放大) */
+    .barcode-wrapper { 
+        transform: rotate(90deg); 
+        width: 85vh; 
+        max-width: 600px;
+        text-align: center; 
+    }
+    #fullBarcode { width: 100%; height: auto; }
+
+    /* QR Code 顯示樣式 */
+    #qrCodeCanvas { 
+        padding: 15px; 
+        background: white; 
+        border: 2px solid #f0f0f0; 
+        border-radius: 12px; 
+    }
+    .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
+    .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; }
+</style>
 </head>
 <body>
 
@@ -1222,6 +1339,7 @@ if (Array.isArray(g.barcode) && g.barcode.length > 0) {
     </script>
 </body>
 </html>
+
 
 
 
