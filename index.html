@@ -184,7 +184,7 @@
                 barcode: ["2449440003024"], // 請換成正確條碼
                 img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
             },
-                  { 
+             { 
                 cat: "常用條碼", brand: "電視運費", 
                 name: "49-440004-001\n收費運費$100", 
                 desc: "電視32吋吋以下$300\n 電視33-49吋$450\n 電視50-54吋$550\n 電視55-59吋$600\n 電視60-74吋$700\n電視75吋以上$1300", 
@@ -1164,8 +1164,6 @@ model: "NA-120EB,NA-110EB,NA-90EB",
             const results = rawData.filter(d => d.cat === selectedCat && d.brand === selectedBrand);
             renderGifts(results);
         }
-
-        // 渲染卡片 HTML
 // --- 修改後的條碼按鈕產生邏輯 ---
 let barcodeBtns = "";
 if (Array.isArray(g.barcode) && g.barcode.length > 0) {
@@ -1224,6 +1222,7 @@ if (Array.isArray(g.barcode) && g.barcode.length > 0) {
     </script>
 </body>
 </html>
+
 
 
 
