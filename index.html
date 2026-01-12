@@ -1290,26 +1290,37 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                 let formattedDesc = g.desc ? g.desc.replace(/\n/g, '<br>').replace(/(\$\d+)/g, '<span class="price-red">$1</span>') : "";
                 
                 // --- 條碼按鈕產生邏輯 ---
-                let barcodeBtns = "";
-                if (Array.isArray(g.barcode) && g.barcode.length > 0) {
-                    g.barcode.forEach((code, i) => {
-                        if (!code || code === "") return; 
+let barcodeBtns = "";
+if (Array.isArray(g.barcode) && g.barcode.length > 0) {
+    g.barcode.forEach((code, i) => {
+        if (!code || code === "") return; 
 
-                        // 預設標籤
-                        let label = g.barcode.length > 1 ? `🛒 條碼(${i+1})` : `🛒 結帳條碼`;
+        // 預設標籤
+        let label = `🛒 條碼(${i+1})`;
 
-                        // 進階標籤：根據分類與順序自動命名
-                        if (g.cat === "DM尾牙") {
-                            const labels = ["🎁 贈品/保固", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
-                            label = labels[i] || label;
-                        } else if (g.cat === "常用條碼" && g.barcode.length > 1) {
-                            const labels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
-                            label = labels[i] || label;
-                        }
+        // 【修正點】根據分類與品牌動態決定標籤名稱
+        if (g.cat === "DM尾牙") {
+            if (g.brand.includes("電視")) {
+                // 電視專用標籤 (5個)
+                const tvLabels = ["🎁 贈品", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
+                label = tvLabels[i] || label;
+            } else if (g.brand === "冷氣") {
+                // 冷氣專用標籤 (通常只有 2 個：贈品、免運)
+                const acLabels = ["🎁 贈品", "🚚 免運$100"];
+                label = acLabels[i] || label;
+            } else {
+                // 冰箱、洗衣機通用標籤 (3個：贈品、免運、收費)
+                const generalLabels = ["🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+                label = generalLabels[i] || label;
+            }
+        } else if (g.cat === "常用條碼") {
+            const labels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
+            label = labels[i] || label;
+        }
 
-                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
-                    });
-                }
+        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
+    });
+}
 
                 const card = document.createElement('div');
                 card.className = 'gift-card';
@@ -1347,6 +1358,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
