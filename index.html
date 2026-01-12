@@ -1284,43 +1284,40 @@ model: "NA-120EB,NA-110EB,NA-90EB",
 
         // 渲染卡片 HTML (這是之前斷掉的地方，我幫你補齊了)
         function renderGifts(data) {
-            giftContainer.innerHTML = '';
+            giftContainer.innerHTML = ''; // 每次渲染前清空，防止殘留舊資料
             data.forEach(g => {
                 let formattedName = g.name.replace(/\n/g, '<br>');
                 let formattedDesc = g.desc ? g.desc.replace(/\n/g, '<br>').replace(/(\$\d+)/g, '<span class="price-red">$1</span>') : "";
                 
-                // --- 條碼按鈕產生邏輯 ---
-let barcodeBtns = "";
-if (Array.isArray(g.barcode) && g.barcode.length > 0) {
-    g.barcode.forEach((code, i) => {
-        if (!code || code === "") return; 
+                let barcodeBtns = "";
+                if (Array.isArray(g.barcode) && g.barcode.length > 0) {
+                    g.barcode.forEach((code, i) => {
+                        if (!code || code === "") return; 
 
-        // 預設標籤
-        let label = `🛒 條碼(${i+1})`;
+                        // 1. 設定預設標籤
+                        let label = `🛒 條碼(${i+1})`;
 
-        // 【修正點】根據分類與品牌動態決定標籤名稱
-        if (g.cat === "DM尾牙") {
-            if (g.brand.includes("電視")) {
-                // 電視專用標籤 (5個)
-                const tvLabels = ["🎁 贈品", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
-                label = tvLabels[i] || label;
-            } else if (g.brand === "冷氣") {
-                // 冷氣專用標籤 (通常只有 2 個：贈品、免運)
-                const acLabels = ["🎁 贈品", "🚚 免運$100"];
-                label = acLabels[i] || label;
-            } else {
-                // 冰箱、洗衣機通用標籤 (3個：贈品、免運、收費)
-                const generalLabels = ["🎁 贈品", "🚚 免運$10", "💰 收費$10"];
-                label = generalLabels[i] || label;
-            }
-        } else if (g.cat === "常用條碼") {
-            const labels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
-            label = labels[i] || label;
-        }
+                        // 2. 針對 DM 尾牙進行精確分類
+                        if (g.cat === "DM尾牙") {
+                            if (g.brand.includes("電視")) {
+                                const labels = ["🎁 贈品/保固", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
+                                label = labels[i] || label;
+                            } else if (g.brand === "冷氣") {
+                                const labels = ["🎁 贈品/保固", "🚚 免運$100"];
+                                label = labels[i] || label;
+                            } else if (g.brand === "冰箱" || g.brand === "洗衣機") {
+                                // 修正：冰箱與洗衣機專用順序
+                                const labels = ["🎁 贈品/保固", "🚚 免運$10", "💰 收費$10"];
+                                label = labels[i] || label;
+                            }
+                        } else if (g.cat === "常用條碼") {
+                            const labels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
+                            label = labels[i] || label;
+                        }
 
-        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
-    });
-}
+                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
+                    });
+                }
 
                 const card = document.createElement('div');
                 card.className = 'gift-card';
@@ -1329,12 +1326,7 @@ if (Array.isArray(g.barcode) && g.barcode.length > 0) {
                     <div class="gift-info">
                         <h4>${formattedName}</h4>
                         <p>${formattedDesc}</p>
-                        <div class="action-btns">
-                            ${barcodeBtns}
-                            ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面')">♻️ 補助</button>` : ''}
-                        </div>
+                        <div class="action-btns">${barcodeBtns}</div>
                     </div>
                 `;
                 giftContainer.appendChild(card);
@@ -1358,6 +1350,7 @@ if (Array.isArray(g.barcode) && g.barcode.length > 0) {
     </script>
 </body>
 </html>
+
 
 
 
