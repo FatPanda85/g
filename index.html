@@ -1272,7 +1272,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
             }
         }
 
-        // 透過選單顯示結果
+   // 透過選單顯示結果
         function showGiftsBySelect() {
             const selectedCat = catSelect.value;
             const selectedBrand = brandSelect.value;
@@ -1281,26 +1281,34 @@ model: "NA-120EB,NA-110EB,NA-90EB",
             const results = rawData.filter(d => d.cat === selectedCat && d.brand === selectedBrand);
             renderGifts(results);
         }
-// --- 修改後的條碼按鈕產生邏輯 ---
-let barcodeBtns = "";
-if (Array.isArray(g.barcode) && g.barcode.length > 0) {
-    g.barcode.forEach((code, i) => {
-        if (!code) return; // 如果是空字串就不產生按鈕
 
-        // 預設標籤
-        let label = g.barcode.length > 1 ? `🛒 條碼(${i+1})` : `🛒 結帳條碼`;
+        // 渲染卡片 HTML (這是之前斷掉的地方，我幫你補齊了)
+        function renderGifts(data) {
+            giftContainer.innerHTML = '';
+            data.forEach(g => {
+                let formattedName = g.name.replace(/\n/g, '<br>');
+                let formattedDesc = g.desc ? g.desc.replace(/\n/g, '<br>').replace(/(\$\d+)/g, '<span class="price-red">$1</span>') : "";
+                
+                // --- 條碼按鈕產生邏輯 ---
+                let barcodeBtns = "";
+                if (Array.isArray(g.barcode) && g.barcode.length > 0) {
+                    g.barcode.forEach((code, i) => {
+                        if (!code || code === "") return; 
 
-        // 進階標籤：根據分類與順序自動命名
-        if (g.cat === "DM尾牙") {
-            const labels = ["🎁 贈品/保固", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
-            label = labels[i] || label;
-        } else if (g.cat === "常用條碼" && g.barcode.length > 1) {
-            const labels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
-            label = labels[i] || label;
-        }
+                        // 預設標籤
+                        let label = g.barcode.length > 1 ? `🛒 條碼(${i+1})` : `🛒 結帳條碼`;
 
-        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
-    });
+                        // 進階標籤：根據分類與順序自動命名
+                        if (g.cat === "DM尾牙") {
+                            const labels = ["🎁 贈品/保固", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
+                            label = labels[i] || label;
+                        } else if (g.cat === "常用條碼" && g.barcode.length > 1) {
+                            const labels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
+                            label = labels[i] || label;
+                        }
+
+                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
+                    });
                 }
 
                 const card = document.createElement('div');
@@ -1339,6 +1347,7 @@ if (Array.isArray(g.barcode) && g.barcode.length > 0) {
     </script>
 </body>
 </html>
+
 
 
 
