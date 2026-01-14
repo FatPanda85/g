@@ -1406,7 +1406,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
         function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
         function zoomBarcode(code) {
             document.getElementById('barcodeOverlay').style.display = 'flex';
-            JsBarcode("#fullBarcode", code, { format: "EAN13", width: 4, height: 120, displayValue: true, fontSize: 18 });
+            JsBarcode("#fullBarcode", code, { format: "EAN13", width: 2, height: 80, displayValue: true, fontSize: 18 });
         }
         function showQrCode(url, title, hint) {
             document.getElementById('qrCodeOverlay').style.display = 'flex';
@@ -1420,6 +1420,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
