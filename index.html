@@ -151,21 +151,33 @@
         cursor: pointer;
     }
     
-    /* 條碼顯示樣式 (橫向放大) */
+    /* 條碼顯示樣式 (縮小置中，不旋轉) */
     .barcode-wrapper { 
-        transform: rotate(90deg); 
-        width: 85vh; 
-        max-width: 600px;
+        width: 100%; 
+        max-width: 300px; /* 限制條碼最大寬度，刷槍才好對焦 */
         text-align: center; 
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    #fullBarcode { width: 100%; height: auto; }
 
-    /* QR Code 顯示樣式 */
+    #fullBarcode { 
+        width: auto !important; 
+        max-width: 100%; 
+        height: auto; 
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    /* QR Code 顯示樣式 (維持原樣) */
     #qrCodeCanvas { 
         padding: 15px; 
         background: white; 
         border: 2px solid #f0f0f0; 
         border-radius: 12px; 
+        display: inline-block;
     }
     .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
     .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; }
@@ -1420,6 +1432,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
