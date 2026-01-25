@@ -15,6 +15,10 @@
         --price-color: #ff3b30; 
         --barcode-color: #34495e; /* 深藍灰，更具識別度 */
         --bg: #f5f5f7; 
+        /* --- 新增以下顏色 --- */
+        --model-blue: #0056b3;   /* 專用型號藍 */
+        --date-orange: #d35400;  /* 專用日期橘 */
+        --bg: #f5f5f7;
     }
 
     body { 
@@ -181,6 +185,11 @@
     }
     .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
     .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; }
+    /* 讓你可以直接在資料裡調用剛才設定的顏色 */
+.text-red { color: var(--price-color) !important; font-weight: bold; }
+.text-blue { color: var(--model-blue) !important; font-weight: bold; }
+.text-orange { color: var(--date-orange) !important; font-weight: bold; }
+.text-green { color: var(--tax-color) !important; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -670,7 +679,7 @@
             { 
     cat: "DM尾牙", 
     brand: "LG電視", 
-    name: "買39型(含)以上電視即贈萬用壁掛架\n44-425056-001 Blacklabel BL-3270壁掛架\n單筆購買4K UHD液晶顯示器或電視，即贈blacklabel BL-ANC88 PLUS降躁耳罩式耳機\n 43-303001-001 blacklabel BL-ANC88 PLUS降躁式耳機", 
+    name: "買39型(含)以上電視即贈萬用壁掛架\n<span class='text-blue'>44-425056-001 Blacklabel BL-3270壁掛架</span>\n單筆購買4K UHD液晶顯示器或電視，即贈blacklabel BL-ANC88 PLUS降躁耳罩式耳機\n <span class='text-blue'>43-303001-001 blacklabel BL-ANC88 PLUS降躁式耳機</span>", 
     desc: "第一個條碼是壁掛架\n第二個是品牌負數扣\n第三個是耳機\n第四個是免運$10條碼\n第五個是收費$10條碼\n電視32吋吋以下$300\n 電視33-49吋$450\n 電視50-54吋$550\n 電視55-59吋$600\n 電視60-74吋$700\n電視75吋以上$1300", 
     barcode: ["4719579893819", "2444042811015","4710631940694","2449440007022","2449440003024"], 
     img: "ANC88.jpg", 
@@ -1493,6 +1502,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
