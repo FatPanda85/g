@@ -1493,40 +1493,28 @@ function zoomBarcode(code) {
 }
 
 function showQrCode(url, title, hint) {
-    // 1. 自動偵測正確的 Overlay ID
-    const overlay = document.getElementById('qrOverlay') || document.getElementById('qrCodeOverlay');
-    if (overlay) overlay.style.display = 'flex';
-
-    // 2. 處理文字與變色暗號
-    const titleElement = document.getElementById('qrTitle');
-    const hintElement = document.getElementById('qrHint');
+    const modal = document.getElementById('qrModal');
+    const qrCanvas = document.getElementById('qrCodeCanvas');
     
-    if (titleElement) titleElement.innerHTML = title;
-    if (hintElement) {
-        // 先處理換行
-        let formattedHint = hint.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-        
-        // 關鍵：將 [ORANGE] 這種暗號換成真正的顏色標籤，避開引號大戰
-        formattedHint = formattedHint.replace(/\[ORANGE\]/g, '<span class="text-orange">').replace(/\[\/ORANGE\]/g, '</span>');
-        formattedHint = formattedHint.replace(/\[RED\]/g, '<span class="text-red">').replace(/\[\/RED\]/g, '</span>');
-        formattedHint = formattedHint.replace(/\[BLUE\]/g, '<span class="text-blue">').replace(/\[\/BLUE\]/g, '</span>');
-        
-        hintElement.innerHTML = formattedHint;
-    }
+    // 清除舊的 QR Code
+    qrCanvas.innerHTML = '';
+    
+    // 生成新的 QR Code
+    new QRCode(qrCanvas, {
+        text: url,
+        width: 256,
+        height: 256
+    });
 
-    // 3. 渲染 QR Code
-    const canvas = document.getElementById('qrCodeCanvas');
-    if (canvas) {
-        canvas.innerHTML = '';
-        new QRCode(canvas, { 
-            text: url, 
-            width: 220, 
-            height: 220, 
-            colorDark: "#333333", 
-            colorLight: "#ffffff", 
-            correctLevel: QRCode.CorrectLevel.H 
-        });
-    }
+    // --- 關鍵修正區：把文字顯示從純文字改為 HTML 模式 ---
+    // 1. 標題改用 innerHTML，讓它可以變色
+    document.getElementById('qrTitle').innerHTML = title;
+    
+    // 2. 說明文字改用 innerHTML，並將 \n 換行符號轉為網頁看得懂的 <br>
+    document.getElementById('qrHint').innerHTML = hint.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+    
+    // 顯示視窗
+    modal.style.display = 'flex';
 }
 
 function closeOverlay(id) { 
@@ -1536,6 +1524,7 @@ function closeOverlay(id) {
     </script>
 </body>
 </html>
+
 
 
 
