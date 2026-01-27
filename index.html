@@ -1481,8 +1481,8 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                         <div class="action-btns">
                             ${barcodeBtns}
                             ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面')">♻️ 補助</button>` : ''}
+                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n※備註:請放在一起拍成一張照片上傳')">💰 退稅</button>` : ''}
+                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -1496,17 +1496,23 @@ model: "NA-120EB,NA-110EB,NA-90EB",
             JsBarcode("#fullBarcode", code, { format: "EAN13", width: 4, height: 120, displayValue: true, fontSize: 18 });
         }
         function showQrCode(url, title, hint) {
-            document.getElementById('qrCodeOverlay').style.display = 'flex';
-            document.getElementById('qrTitle').innerText = title;
-            document.getElementById('qrHint').innerText = hint;
-            const canvas = document.getElementById('qrCodeCanvas');
-            canvas.innerHTML = '';
-            new QRCode(canvas, { text: url, width: 220, height: 220, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
-        }
+    document.getElementById('qrCodeOverlay').style.display = 'flex';
+    document.getElementById('qrTitle').innerText = title;
+    
+    // --- 重點：讓 innerText 認識 \n 的關鍵 ---
+    const hintElement = document.getElementById('qrHint');
+    hintElement.style.whiteSpace = "pre-line"; // 讓 CSS 處理換行
+    hintElement.innerText = hint; 
+    
+    const canvas = document.getElementById('qrCodeCanvas');
+    canvas.innerHTML = '';
+    new QRCode(canvas, { text: url, width: 220, height: 220, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+}
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
 </html>
+
 
 
 
