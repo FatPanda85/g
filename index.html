@@ -1481,49 +1481,33 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                         <div class="action-btns">
                             ${barcodeBtns}
                             ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\\n[ORANGE]申請貨物稅補助請準備以下資料[/ORANGE]\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n[RED]※備註:請放在一起拍成一張照片上傳[/RED]')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n[ORANGE]申請舊機補助資料請準備以下資料:[/ORANGE]\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
+                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面')">💰 退稅</button>` : ''}
+                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面')">♻️ 補助</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                giftContainer.appendChild(card);
             });
-        } // 結束點，後面不要再有其他 } 了
-function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
+        }
 
-function zoomBarcode(code) {
-    document.getElementById('barcodeOverlay').style.display = 'flex';
-    JsBarcode("#fullBarcode", code, { format: "EAN13", width: 2, height: 80, displayValue: true, fontSize: 18 });
-}
-
-function showQrCode(url, title, hint) {
-    const modal = document.getElementById('qrModal');
-    const qrCanvas = document.getElementById('qrCodeCanvas');
-    
-    // 清除舊的 QR Code
-    qrCanvas.innerHTML = '';
-    
-    // 生成新的 QR Code
-    new QRCode(qrCanvas, {
-        text: url,
-        width: 256,
-        height: 256
-    });
-
-    // --- 關鍵修正區：把文字顯示從純文字改為 HTML 模式 ---
-    // 1. 標題改用 innerHTML，讓它可以變色
-    document.getElementById('qrTitle').innerHTML = title;
-    
-    // 2. 說明文字改用 innerHTML，並將 \n 換行符號轉為網頁看得懂的 <br>
-    document.getElementById('qrHint').innerHTML = hint.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-    
-    // 顯示視窗
-    modal.style.display = 'flex';
-}
-
-function closeOverlay(id) { 
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none'; 
-}
+        function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
+        function zoomBarcode(code) {
+            document.getElementById('barcodeOverlay').style.display = 'flex';
+            JsBarcode("#fullBarcode", code, { format: "EAN13", width: 4, height: 120, displayValue: true, fontSize: 18 });
+        }
+        function showQrCode(url, title, hint) {
+            document.getElementById('qrCodeOverlay').style.display = 'flex';
+            document.getElementById('qrTitle').innerText = title;
+            document.getElementById('qrHint').innerText = hint;
+            const canvas = document.getElementById('qrCodeCanvas');
+            canvas.innerHTML = '';
+            new QRCode(canvas, { text: url, width: 220, height: 220, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+        }
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
 </html>
+
 
 
 
