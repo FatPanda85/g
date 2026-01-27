@@ -1481,29 +1481,46 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                         <div class="action-btns">
                             ${barcodeBtns}
                             ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                       ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\\n<span class=\'text-orange\'>申請貨物稅補助請準備以下資料</span>\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n<span class=\'text-red\'>※備註:請放在一起拍成一張照片上傳</span>')">💰 退稅</button>` : ''}
-                       ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n<span class=\'text-orange\'>申請舊機補助資料請準備以下資料:</span>\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
+                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\\n[ORANGE]申請貨物稅補助請準備以下資料[/ORANGE]\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n[RED]※備註:請放在一起拍成一張照片上傳[/RED]')">💰 退稅</button>` : ''}
+                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n[ORANGE]申請舊機補助資料請準備以下資料:[/ORANGE]\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
             });
         } // 結束點，後面不要再有其他 } 了
 
-        function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
-        function zoomBarcode(code) {
-            document.getElementById('barcodeOverlay').style.display = 'flex';
-            JsBarcode("#fullBarcode", code, { format: "EAN13", width: 2, height: 80, displayValue: true, fontSize: 18 });
-        }
-        function showQrCode(url, title, hint) {
-    // 1. 確保 ID 名稱與 HTML 一致 (通常是 qrOverlay)
+        沒問題，我直接幫你把這段「最容易出錯」的地方寫成最穩定的版本。
+
+這段代碼失效的原因通常是**引號（' 或 "）**在傳遞過程中互相衝突，導致網頁讀取中斷。我現在提供的版本會自動把「暗號」換成「顏色」，這樣按鈕絕對點得開，文字也會變色。
+
+請直接刪除你剛才貼出的那段代碼，完整替換為以下這段：
+
+🛠️ 請直接複製並替換這段 JavaScript
+JavaScript
+function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
+
+function zoomBarcode(code) {
+    document.getElementById('barcodeOverlay').style.display = 'flex';
+    JsBarcode("#fullBarcode", code, { format: "EAN13", width: 2, height: 80, displayValue: true, fontSize: 18 });
+}
+
+function showQrCode(url, title, hint) {
+    // 1. 自動偵測正確的 Overlay ID
     const overlay = document.getElementById('qrOverlay') || document.getElementById('qrCodeOverlay');
     if (overlay) overlay.style.display = 'flex';
 
-    // 2. 核心變色修正：使用 innerHTML 才能顯示顏色標籤
-    // 並同時處理 "\\n" (按鈕傳來的) 和 "\n" (資料傳來的) 換行
+    // 2. 處理文字與變色暗號
     const titleElement = document.getElementById('qrTitle');
     const hintElement = document.getElementById('qrHint');
     
     if (titleElement) titleElement.innerHTML = title;
     if (hintElement) {
-        hintElement.innerHTML = hint.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+        // 先處理換行
+        let formattedHint = hint.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+        
+        // 關鍵：將 [ORANGE] 這種暗號換成真正的顏色標籤，避開引號大戰
+        formattedHint = formattedHint.replace(/\[ORANGE\]/g, '<span class="text-orange">').replace(/\[\/ORANGE\]/g, '</span>');
+        formattedHint = formattedHint.replace(/\[RED\]/g, '<span class="text-red">').replace(/\[\/RED\]/g, '</span>');
+        formattedHint = formattedHint.replace(/\[BLUE\]/g, '<span class="text-blue">').replace(/\[\/BLUE\]/g, '</span>');
+        
+        hintElement.innerHTML = formattedHint;
     }
 
     // 3. 渲染 QR Code
@@ -1514,7 +1531,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
             text: url, 
             width: 220, 
             height: 220, 
-            colorDark: "#000000", 
+            colorDark: "#333333", 
             colorLight: "#ffffff", 
             correctLevel: QRCode.CorrectLevel.H 
         });
@@ -1528,6 +1545,7 @@ function closeOverlay(id) {
     </script>
 </body>
 </html>
+
 
 
 
