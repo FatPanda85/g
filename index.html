@@ -9,16 +9,14 @@
    <style>
     /* 全域變數設定 */
     :root { 
-        --primary: #007AFF; 
-        --tax-color: #28a745; 
-        --old-color: #fd7e14; 
-        --price-color: #ff3b30; 
-        --barcode-color: #34495e; /* 深藍灰，更具識別度 */
-        --bg: #f5f5f7; 
-        /* --- 新增以下顏色 --- */
-        --model-blue: #0056b3;   /* 專用型號藍 */
-        --date-orange: #d35400;  /* 專用日期橘 */
-        --bg: #f5f5f7;
+       --primary: #007AFF;          /* 標準藍 */
+        --tax-color: #28a745;        /* 退稅綠 */
+        --old-color: #fd7e14;        /* 補助橘 */
+        --price-color: #ff3b30;      /* 金額紅 */
+        --barcode-color: #34495e;    /* 深藍灰 */
+        --model-blue: #0056b3;       /* 型號深藍 */
+        --date-orange: #d35400;      /* 日期磚橘 */
+        --bg: #f5f5f7;               /* 淺灰背景 */
     }
 
     body { 
@@ -186,10 +184,17 @@
     .qr-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; text-align: center; }
     .hint-text { margin-top: 20px; color: #888; text-align: center; font-size: 0.95rem; }
     /* 讓你可以直接在資料裡調用剛才設定的顏色 */
-.text-red { color: var(--price-color) !important; font-weight: bold; }
-.text-blue { color: var(--model-blue) !important; font-weight: bold; }
-.text-orange { color: var(--date-orange) !important; font-weight: bold; }
-.text-green { color: var(--tax-color) !important; font-weight: bold; }
+/* 1. 基礎色系 */
+    .text-blue { color: var(--primary) !important; font-weight: bold; }      /* 標準藍 */
+    .text-green { color: var(--tax-color) !important; font-weight: bold; }    /* 退稅綠 */
+    .text-orange { color: var(--old-color) !important; font-weight: bold; }   /* 補助亮橘 */
+    .text-red { color: var(--price-color) !important; font-weight: bold; }    /* 金額紅 */
+
+    /* 2. 進階標註色系 */
+    .text-dark { color: var(--barcode-color) !important; }                    /* 深藍灰 (適合小字) */
+    .text-mblue { color: var(--model-blue) !important; font-weight: bold; }   /* 型號深藍 */
+    .text-dorange { color: var(--date-orange) !important; font-weight: bold; } /* 日期磚橘 */
+    .text-gray { color: #888888 !important; font-size: 0.9em; }               /* 淡淡的灰色 (適合註解) */
 </style>
 </head>
 <body>
@@ -1476,8 +1481,8 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                         <div class="action-btns">
                             ${barcodeBtns}
                             ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面')">♻️ 補助</button>` : ''}
+                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\n<span class='text-orange'>申請貨物稅補助請準備以下資料</span>\n1.發票\n2.存摺\n3.身分證\n4.保證書\n<span class='text-red'>※備註:請放在一起拍成一張照片上傳</span>')">💰 退稅</button>` : ''}
+                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\n<span class='text-orange'>申請舊機補助資料請準備以下資料:</span>\n1.發票\n2.存摺\n3.身分證\n4.保證書\n5.電費單\n6.回收單\n7.能源效率表')">♻️ 補助</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -1502,6 +1507,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
