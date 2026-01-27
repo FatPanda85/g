@@ -1485,15 +1485,6 @@ model: "NA-120EB,NA-110EB,NA-90EB",
                             ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n[ORANGE]申請舊機補助資料請準備以下資料:[/ORANGE]\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
             });
         } // 結束點，後面不要再有其他 } 了
-
-        沒問題，我直接幫你把這段「最容易出錯」的地方寫成最穩定的版本。
-
-這段代碼失效的原因通常是**引號（' 或 "）**在傳遞過程中互相衝突，導致網頁讀取中斷。我現在提供的版本會自動把「暗號」換成「顏色」，這樣按鈕絕對點得開，文字也會變色。
-
-請直接刪除你剛才貼出的那段代碼，完整替換為以下這段：
-
-🛠️ 請直接複製並替換這段 JavaScript
-JavaScript
 function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
 
 function zoomBarcode(code) {
@@ -1545,6 +1536,7 @@ function closeOverlay(id) {
     </script>
 </body>
 </html>
+
 
 
 
