@@ -341,6 +341,18 @@ async function calculateNearest() {
 </head>
 <body>
 
+    <div id="store-finder-section" style="padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: -apple-system, sans-serif;">
+        <h4 style="margin: 0 0 12px 0; color: #1a73e8; font-size: 1.2rem;">🚚 快速出貨分店查詢</h4>
+        <input type="text" id="custAddr" placeholder="輸入客人地址 (例: 名間鄉外埔巷)" 
+               inputmode="search"
+               style="width: 100%; padding: 15px; border: 2px solid #e1e4e8; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+        <button onclick="calculateNearest()" id="calcBtn"
+                style="width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer;">
+            🔍 計算最近門市
+        </button>
+        <div id="finalResultList" style="margin-top: 15px;"></div>
+    </div>
+
     <div class="header-container">
         <div class="search-row">
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 輸入型號 (如: LJ50, K28...)" onkeypress="handleKeyPress(event)">
@@ -355,29 +367,6 @@ async function calculateNearest() {
                 <option value="">-- 2. 選擇品牌 --</option>
             </select>
         </div>
-    </div>
-
-    <div id="giftContainer"></div>
-
-    <div id="imgOverlay" class="overlay" onclick="this.style.display='none'">
-        <button class="close-btn">&times;</button>
-        <img id="zoomedImg" style="max-width:95%; max-height:80%; border-radius:12px;">
-        <p style="margin-top:20px; color:#666;">點擊螢幕關閉</p>
-    </div>
-
-    <div id="barcodeOverlay" class="overlay">
-        <button class="close-btn" onclick="closeOverlay('barcodeOverlay')">&times;</button>
-        <div class="barcode-wrapper">
-            <svg id="fullBarcode"></svg>
-        </div>
-        <p class="hint-text">請向收銀員出示條碼</p>
-    </div>
-
-    <div id="qrCodeOverlay" class="overlay">
-        <button class="close-btn" onclick="closeOverlay('qrCodeOverlay')">&times;</button>
-        <div id="qrTitle" class="qr-title"></div>
-        <div id="qrCodeCanvas"></div>
-        <p id="qrHint" class="hint-text"></p>
     </div>
 
     <script>
@@ -1654,6 +1643,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
