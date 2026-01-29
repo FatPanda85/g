@@ -1568,62 +1568,72 @@ model: "NA-120EB,NA-110EB,NA-90EB",
         }
 
 // 渲染卡片 HTML
-        function renderGifts(data) {
-            giftContainer.innerHTML = '';
-            data.forEach(g => {
-                let formattedName = g.name.replace(/\n/g, '<br>');
-                let formattedDesc = g.desc ? g.desc.replace(/\n/g, '<br>').replace(/(\$\d+)/g, '<span class="price-red">$1</span>') : "";
-                
-                // --- 條碼按鈕產生邏輯 ---
-                let barcodeBtns = "";
-                if (Array.isArray(g.barcode) && g.barcode.length > 0) {
-                    g.barcode.forEach((code, i) => {
-                        if (!code || code === "") return; 
+function renderGifts(data) {
+    // 關鍵修正：每次執行時重新抓取容器，避免 null 錯誤
+    const giftContainer = document.getElementById('giftContainer');
+    
+    // 安全檢查：如果畫面上找不到這個 div，就停止執行
+    if (!giftContainer) {
+        console.error("找不到 giftContainer 元素，請檢查 HTML 是否有 <div id='giftContainer'></div>");
+        return;
+    }
 
-                        // 預設標籤
-                        let label = `🛒 結帳條碼(${i+1})`;
+    giftContainer.innerHTML = ''; // 清空目前的內容
 
-                        // 修正 DM 尾牙渲染邏輯
-                        if (g.cat === "DM尾牙") {
-                            if (g.brand.includes("電視")) {
-                                const tvLabels = ["🎁 贈品", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
-                                label = tvLabels[i] || label;
-                            } else if (g.brand === "冷氣") {
-                                const acLabels = ["🎁 贈品", "🚚 免運$100"];
-                                label = acLabels[i] || label;
-                            } else {
-                                // 冰箱與洗衣機通用
-                                const generalLabels = ["🎁 贈品", "🚚 免運$10", "💰 收費$10"];
-                                label = generalLabels[i] || label;
-                            }
-                        } else if (g.cat === "常用條碼") {
-                            const commonLabels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
-                            label = commonLabels[i] || label;
-                        }
+    data.forEach(g => {
+        let formattedName = g.name.replace(/\n/g, '<br>');
+        let formattedDesc = g.desc ? g.desc.replace(/\n/g, '<br>').replace(/(\$\d+)/g, '<span class="price-red">$1</span>') : "";
+        
+        // --- 條碼按鈕產生邏輯 ---
+        let barcodeBtns = "";
+        if (Array.isArray(g.barcode) && g.barcode.length > 0) {
+            g.barcode.forEach((code, i) => {
+                if (!code || code === "") return; 
 
-                        barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
-                    });
+                // 預設標籤
+                let label = `🛒 結帳條碼(${i+1})`;
+
+                // 修正 DM 尾牙渲染邏輯
+                if (g.cat === "DM尾牙") {
+                    if (g.brand && g.brand.includes("電視")) {
+                        const tvLabels = ["🎁 贈品", "➖ 品牌負載", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
+                        label = tvLabels[i] || label;
+                    } else if (g.brand === "冷氣") {
+                        const acLabels = ["🎁 贈品", "🚚 免運$100"];
+                        label = acLabels[i] || label;
+                    } else {
+                        // 冰箱與洗衣機通用
+                        const generalLabels = ["🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+                        label = generalLabels[i] || label;
+                    }
+                } else if (g.cat === "常用條碼") {
+                    const commonLabels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
+                    label = commonLabels[i] || label;
                 }
 
-                // --- 產生卡片內容 (確保 QR Code 按鈕存在) ---
-                const card = document.createElement('div');
-                card.className = 'gift-card';
-                card.innerHTML = `
-                    <img src="${g.img || ''}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/90?text=無圖片'">
-                    <div class="gift-info">
-                        <h4>${formattedName}</h4>
-                        <p>${formattedDesc}</p>
-                        <div class="action-btns">
-                            ${barcodeBtns}
-                            ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
-                            ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\\n申請貨物稅補助請準備以下資料:\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n※備註:請放在一起拍成一張照片上傳')">💰 退稅</button>` : ''}
-                            ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n申請舊機補助請準備以下資料:\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
-                        </div>
-                    </div>
-                `;
-                giftContainer.appendChild(card);
+                barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
             });
         }
+
+        // --- 產生卡片內容 ---
+        const card = document.createElement('div');
+        card.className = 'gift-card';
+        card.innerHTML = `
+            <img src="${g.img || ''}" class="gift-img" onclick="zoomImg('${g.img}')" onerror="this.src='https://via.placeholder.com/90?text=無圖片'">
+            <div class="gift-info">
+                <h4>${formattedName}</h4>
+                <p>${formattedDesc}</p>
+                <div class="action-btns">
+                    ${barcodeBtns}
+                    ${g.qrUrl ? `<button class="action-btn btn-activity" onclick="showQrCode('${g.qrUrl}','官方活動官網','請引導客人掃描前往登錄')">📱 活動</button>` : ''}
+                    ${g.taxUrl ? `<button class="action-btn btn-tax" onclick="showQrCode('${g.taxUrl}','貨物稅退稅申請','請掃描 QR Code 進入退稅頁面\\n申請貨物稅補助請準備以下資料:\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n※備註:請放在一起拍成一張照片上傳')">💰 退稅</button>` : ''}
+                    ${g.oldUrl ? `<button class="action-btn btn-old" onclick="showQrCode('${g.oldUrl}','節能舊機補助','請掃描 QR Code 進入補助頁面\\n申請舊機補助請準備以下資料:\\n1.發票\\n2.存摺\\n3.身分證\\n4.保證書\\n5.電費單\\n6.回收單\\n7.能源效率表')">♻️ 補助</button>` : ''}
+                </div>
+            </div>
+        `;
+        giftContainer.appendChild(card);
+    });
+}
 
         function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
         function zoomBarcode(code) {
@@ -1647,6 +1657,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
