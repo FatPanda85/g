@@ -1639,27 +1639,67 @@ function renderGifts(data) {
 }
 
         function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
-        function zoomBarcode(code) {
-            document.getElementById('barcodeOverlay').style.display = 'flex';
-            JsBarcode("#fullBarcode", code, { format: "EAN13", width: 4, height: 120, displayValue: true, fontSize: 18 });
-        }
-        function showQrCode(url, title, hint) {
+ // 1. 修正後的條碼放大功能
+function zoomBarcode(code) {
+    // 這裡的 ID 必須跟下方的 HTML id="barcodeModal" 一致
+    const modal = document.getElementById('barcodeModal');
+    if (modal) {
+        modal.style.display = 'block'; // 顯示視窗
+    }
+    
+    // 這裡的 ID 必須跟下方的 HTML id="barcodeCanvas" 一致
+    // 格式使用 CODE128，這是最通用的結帳條碼格式
+    JsBarcode("#barcodeCanvas", code, { 
+        format: "CODE128", 
+        width: 3, 
+        height: 120, 
+        displayValue: false 
+    });
+
+    // 把條碼文字顯示在 id="barcodeNum" 的位置
+    const numElem = document.getElementById('barcodeNum');
+    if (numElem) numElem.innerText = code;
+}
+
+// 2. 修正後的關閉功能 (對應你 HTML 裡的 closeModal)
+function closeModal(id) {
+    const target = document.getElementById(id);
+    if (target) target.style.display = 'none';
+}
+
+// 3. 你的活動 QR Code 功能 (完全保留你的 \n 換行邏輯，沒動它)
+function showQrCode(url, title, hint) {
     document.getElementById('qrCodeOverlay').style.display = 'flex';
     document.getElementById('qrTitle').innerText = title;
     
-    // --- 重點：讓 innerText 認識 \n 的關鍵 ---
     const hintElement = document.getElementById('qrHint');
-    hintElement.style.whiteSpace = "pre-line"; // 讓 CSS 處理換行
+    hintElement.style.whiteSpace = "pre-line"; // 關鍵：這行能讓 \n 正常換行
     hintElement.innerText = hint; 
     
     const canvas = document.getElementById('qrCodeCanvas');
     canvas.innerHTML = '';
-    new QRCode(canvas, { text: url, width: 220, height: 220, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+    new QRCode(canvas, { 
+        text: url, 
+        width: 220, 
+        height: 220, 
+        colorDark: "#000000", 
+        colorLight: "#ffffff", 
+        correctLevel: QRCode.CorrectLevel.H 
+    });
 }
-        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
     </script>
+    <div id="barcodeModal" class="modal" style="display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8);">
+    <div style="background:white; width:90%; max-width:400px; margin:15% auto; padding:20px; border-radius:15px; text-align:center; position:relative;">
+        <span onclick="closeModal('barcodeModal')" style="position:absolute; right:15px; top:10px; font-size:28px; cursor:pointer;">&times;</span>
+        <h3 id="modalTitle" style="margin-top:0;">結帳條碼</h3>
+        <svg id="barcodeCanvas"></svg>
+        <p id="barcodeNum" style="font-weight:bold; font-size:1.2rem; margin:10px 0;"></p>
+        <button onclick="closeModal('barcodeModal')" style="width:100%; padding:12px; background:#444; color:white; border:none; border-radius:8px; margin-top:10px;">關閉</button>
+    </div>
+</div>
 </body>
 </html>
+
 
 
 
