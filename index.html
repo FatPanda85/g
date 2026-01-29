@@ -226,7 +226,21 @@
         </div>
         <div id="giftContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;"></div>
 
-<div id="barcodeModal" class="modal"> ... </div>
+<div id="barcodeModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85);">
+    <div style="background:white; width:90%; max-width:400px; margin:20% auto; padding:25px; border-radius:15px; text-align:center; position:relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <span onclick="closeModal('barcodeModal')" style="position:absolute; right:15px; top:5px; font-size:32px; cursor:pointer; color:#888;">&times;</span>
+        
+        <h3 style="margin:0 0 15px 0; color:#333;">結帳條碼</h3>
+        
+        <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+            <svg id="barcodeCanvas" style="max-width: 100%;"></svg>
+        </div>
+        
+        <p id="barcodeNum" style="font-weight:bold; font-size:1.4rem; color:#1a73e8; margin:10px 0; letter-spacing: 2px;"></p>
+        
+        <button onclick="closeModal('barcodeModal')" style="width:100%; padding:15px; background:#444; color:white; border:none; border-radius:10px; font-size:1.1rem; font-weight:bold; margin-top:10px;">關閉</button>
+    </div>
+</div>
     </div>
 
     <script>
@@ -1641,24 +1655,33 @@ function renderGifts(data) {
         function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
  // 1. 修正後的條碼放大功能
 function zoomBarcode(code) {
-    // 這裡的 ID 必須跟下方的 HTML id="barcodeModal" 一致
     const modal = document.getElementById('barcodeModal');
-    if (modal) {
-        modal.style.display = 'block'; // 顯示視窗
-    }
+    const canvas = document.getElementById('barcodeCanvas');
     
-    // 這裡的 ID 必須跟下方的 HTML id="barcodeCanvas" 一致
-    // 格式使用 CODE128，這是最通用的結帳條碼格式
-    JsBarcode("#barcodeCanvas", code, { 
-        format: "CODE128", 
-        width: 3, 
-        height: 120, 
-        displayValue: false 
-    });
-
-    // 把條碼文字顯示在 id="barcodeNum" 的位置
-    const numElem = document.getElementById('barcodeNum');
-    if (numElem) numElem.innerText = code;
+    if (modal) {
+        // 1. 先顯示視窗，JsBarcode 才抓得到寬度畫圖
+        modal.style.display = 'block'; 
+        
+        // 2. 延遲一小下（10毫秒）確保瀏覽器已經渲染出 modal 
+        setTimeout(() => {
+            try {
+                JsBarcode("#barcodeCanvas", code, { 
+                    format: "CODE128", 
+                    width: 2.5, 
+                    height: 100, 
+                    displayValue: false 
+                });
+                
+                // 3. 填入條碼文字
+                const numElem = document.getElementById('barcodeNum');
+                if (numElem) numElem.innerText = code;
+            } catch (err) {
+                console.error("條碼產生失敗:", err);
+            }
+        }, 10);
+    } else {
+        alert("找不到條碼視窗(barcodeModal)，請檢查 HTML！");
+    }
 }
 
 // 2. 修正後的關閉功能 (對應你 HTML 裡的 closeModal)
@@ -1699,6 +1722,7 @@ function showQrCode(url, title, hint) {
 </div>
 </body>
 </html>
+
 
 
 
