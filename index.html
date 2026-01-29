@@ -1505,37 +1505,57 @@ model: "NA-120EB,NA-110EB,NA-90EB",
         }
 
         // 下拉選單連動：更新品牌
-        function updateBrands() {
-            const selectedCat = catSelect.value;
-            brandSelect.innerHTML = '<option value="">-- 2. 選擇品牌 --</option>';
-            giftContainer.innerHTML = '';
-            if (!selectedCat) { brandSelect.disabled = true; return; }
-            const brands = [...new Set(rawData.filter(d => d.cat === selectedCat).map(d => d.brand))];
-            brands.forEach(b => {
-                const opt = document.createElement('option'); opt.value = b; opt.textContent = b;
-                brandSelect.appendChild(opt);
-            });
-            brandSelect.disabled = false;
-        }
+       function updateBrands() {
+    const catSelect = document.getElementById('categorySelect');
+    const brandSelect = document.getElementById('brandSelect');
+    const giftContainer = document.getElementById('giftContainer');
+
+    if (!catSelect || !brandSelect) return; // 安全檢查
+
+    const selectedCat = catSelect.value;
+    brandSelect.innerHTML = '<option value="">-- 2. 選擇品牌 --</option>';
+    brandSelect.disabled = !selectedCat;
+    
+    // 清空贈品區
+    if (giftContainer) giftContainer.innerHTML = "";
+
+    if (selectedCat) {
+        const brands = [...new Set(rawData.filter(d => d.cat === selectedCat).map(d => d.brand))];
+        brands.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b;
+            opt.textContent = b;
+            brandSelect.appendChild(opt);
+        });
+    }
+}
 
         // 搜尋型號邏輯 (只搜 model 欄位)
         function searchModel() {
-            const term = searchInput.value.trim().toUpperCase();
-            if (term === "") { alert("請輸入型號關鍵字"); return; }
+    const searchInput = document.getElementById('searchInput');
+    const giftContainer = document.getElementById('giftContainer');
+    
+    if (!searchInput || !giftContainer) return;
 
-            // 重設選單狀態
-            catSelect.value = "";
-            brandSelect.value = "";
-            brandSelect.disabled = true;
+    const term = searchInput.value.trim().toUpperCase();
+    if (term === "") { alert("請輸入型號關鍵字"); return; }
 
-            const results = rawData.filter(d => d.model && d.model.toUpperCase().includes(term));
-            
-            if (results.length === 0) {
-                giftContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:30px;">❌ 找不到符合此型號的資料</p>';
-            } else {
-                renderGifts(results);
-            }
-        }
+    // 重設其他選單狀態
+    document.getElementById('categorySelect').value = "";
+    document.getElementById('brandSelect').value = "";
+    document.getElementById('brandSelect').disabled = true;
+
+    // 搜尋邏輯：確保有 model 欄位才進行比對
+    const results = rawData.filter(d => 
+        d.model && d.model.toUpperCase().includes(term)
+    );
+    
+    if (results.length === 0) {
+        giftContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:30px;">❌ 找不到符合此型號的資料</p>';
+    } else {
+        renderGifts(results);
+    }
+}
 
    // 透過選單顯示結果
         function showGiftsBySelect() {
@@ -1627,6 +1647,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
