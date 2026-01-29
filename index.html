@@ -328,6 +328,11 @@ async function calculateNearest() {
             let html = '<div style="margin-top: 10px;">';
             sorted.forEach((s, i) => {
                 // 注意這裡修正了 ${} 的用法
+               let html = '<div style="margin-top: 10px;">';
+            sorted.forEach((s, i) => {
+                // 這裡修正了導航連結，使用正確的樣板字面值 ${}
+                const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`;
+                
                 html += `
                 <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                     <div style="font-weight:bold; font-size: 1.1rem; color:${i === 0 ? '#1a73e8' : '#333'};">
@@ -337,7 +342,7 @@ async function calculateNearest() {
                     <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">📞 撥電話</a>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
+                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
                     </div>
                 </div>`;
             });
@@ -1625,6 +1630,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
