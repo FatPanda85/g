@@ -25,149 +25,6 @@
         margin: 0; 
         padding: 15px; 
     }
-<div id="store-finder-section" style="padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: -apple-system, sans-serif;">
-    <h4 style="margin: 0 0 12px 0; color: #1a73e8; font-size: 1.2rem;">🚚 快速出貨分店查詢</h4>
-    <input type="text" id="custAddr" placeholder="輸入客人地址 (例: 名間鄉外埔巷)" 
-           inputmode="search"
-           style="width: 100%; padding: 15px; border: 2px solid #e1e4e8; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
-    <button onclick="calculateNearest()" id="calcBtn"
-            style="width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer;">
-        🔍 計算最近門市
-    </button>
-    <div id="finalResultList" style="margin-top: 15px;"></div>
-</div>
-
-<script>
-// 門市完整資料庫 (已轉換座標與電話)
-const storeDatabase = [
-    { name: "南港店", phone: "02-2653-0598", addr: "台北市南港區南港路二段146號B2", lat: 25.052, lng: 121.592 },
-    { name: "三民店", phone: "02-2767-0702", addr: "台北市松山區三民路160號", lat: 25.061, lng: 121.562 },
-    { name: "內湖店", phone: "02-8790-5000", addr: "台北市內湖區民善街88號", lat: 25.062, lng: 121.576 },
-    { name: "桂林店", phone: "02-2388-9887", addr: "台北市萬華區桂林路1號", lat: 25.038, lng: 121.506 },
-    { name: "重慶店", phone: "02-2553-7389", addr: "台北市大同區重慶北路二段171號", lat: 25.058, lng: 121.514 },
-    { name: "天母店", phone: "02-2833-8042", addr: "台北市士林區德行西路47號", lat: 25.103, lng: 121.521 },
-    { name: "北大店", phone: "02-3501-6879", addr: "新北市樹林區大雅路288號B1", lat: 24.945, lng: 121.378 },
-    { name: "林口店", phone: "02-2602-5858", addr: "新北市林口區文化二路一段559號B1", lat: 25.078, lng: 121.379 },
-    { name: "新店店", phone: "02-8919-3333", addr: "新北市新店區中興路三段1號", lat: 24.976, lng: 121.546 },
-    { name: "樹林店", phone: "02-2681-0000", addr: "新北市樹林區大安路118號", lat: 24.997, lng: 121.421 },
-    { name: "土城店", phone: "02-2265-6001", addr: "新北市土城區青雲路152號B1", lat: 24.985, lng: 121.455 },
-    { name: "中和店", phone: "02-8245-5566", addr: "新北市中和區中山路二段295號B1", lat: 25.001, lng: 121.496 },
-    { name: "板橋店", phone: "02-2964-2988", addr: "新北市板橋區三民路二段31號B1", lat: 25.019, lng: 121.478 },
-    { name: "中平店", phone: "02-8992-5678", addr: "新北市新莊區中平路108號B1", lat: 25.048, lng: 121.445 },
-    { name: "蘆洲店", phone: "02-8287-9000", addr: "新北市三重區五華街282號", lat: 25.087, lng: 121.492 },
-    { name: "重新店", phone: "02-2999-5000", addr: "新北市三重區重新路五段654號", lat: 25.044, lng: 121.465 },
-    { name: "汐科店", phone: "02-2697-1098", addr: "新北市汐止區新台五路一段99號B1", lat: 25.062, lng: 121.649 },
-    { name: "淡新店", phone: "02-8631-8880", addr: "新北市淡水區中山北路二段383號", lat: 25.183, lng: 121.444 },
-    { name: "宜蘭店", phone: "03-936-1188", addr: "宜蘭縣宜蘭市民權路二段38巷2號B2", lat: 24.754, lng: 121.751 },
-    { name: "青埔店", phone: "03-2876-020", addr: "桃園市中壢區高鐵南路2段352號2樓", lat: 24.991, lng: 121.214 },
-    { name: "八德店", phone: "03-361-1385", addr: "桃園市八德區介壽路一段728號B2", lat: 24.957, lng: 121.298 },
-    { name: "中原店", phone: "03-4334601", addr: "桃園市中壢區中華路二段501號", lat: 24.969, lng: 121.248 },
-    { name: "經國店", phone: "03-316-0676", addr: "桃園市桃園區經國路369號", lat: 25.021, lng: 121.299 },
-    { name: "內壢店", phone: "03-452-6000", addr: "桃園市中壢區中華路一段450號", lat: 24.975, lng: 121.258 },
-    { name: "中壢店", phone: "03-456-2149", addr: "桃園市中壢區中山東路二段510號", lat: 24.949, lng: 121.238 },
-    { name: "平鎮店", phone: "03-469-0288", addr: "桃園市平鎮區坤慶路1號", lat: 24.912, lng: 121.192 },
-    { name: "苗栗店", phone: "03-733-3000", addr: "苗栗縣苗栗市國華路599號", lat: 24.571, lng: 120.825 },
-    { name: "西屯店", phone: "04-2465-2028", addr: "台中市西屯區台灣大道四段1086號", lat: 24.181, lng: 120.612 },
-    { name: "豐原店", phone: "04-2526-5151", addr: "台中市豐原區成功路500號", lat: 24.246, lng: 120.710 },
-    { name: "太平店", phone: "04-2277-8068", addr: "台中市太平區中平七街70號", lat: 24.127, lng: 120.713 },
-    { name: "文心店", phone: "04-2254-3355", addr: "台中市南屯區文心路一段521號", lat: 24.148, lng: 120.643 },
-    { name: "青海店", phone: "04-2707-3866", addr: "台中市西屯區青海路二段207-18號", lat: 24.170, lng: 120.644 },
-    { name: "德安店", phone: "04-2223-6677", addr: "台中市東區復興路4段186號B1", lat: 24.136, lng: 120.687 },
-    { name: "大墩店", phone: "04-2310-8467", addr: "台中市南屯區大墩路533號B1", lat: 24.152, lng: 120.648 },
-    { name: "中清店", phone: "04-2426-2555", addr: "台中市西屯區中清路三段436號", lat: 24.195, lng: 120.645 },
-    { name: "沙鹿店", phone: "04-2665-2300", addr: "台中市沙鹿區光華路336號", lat: 24.238, lng: 120.565 },
-    { name: "彰化店", phone: "04-736-7397", addr: "彰化縣彰化市金馬路二段321號", lat: 24.092, lng: 120.546 },
-    { name: "南投店", phone: "04-9224-5318", addr: "南投縣南投市三和三路21號", lat: 23.906, lng: 120.686 },
-    { name: "埔里店", phone: "04-9291-2088", addr: "南投縣埔里鎮信義路1029號", lat: 23.968, lng: 120.959 },
-    { name: "嘉義店", phone: "05-235-3606", addr: "嘉義市西區博愛路二段461號", lat: 23.475, lng: 120.434 },
-    { name: "北港店", phone: "05-783-0163", addr: "雲林縣北港鎮華南路101號", lat: 23.565, lng: 120.301 },
-    { name: "斗六店", phone: "05-537-5500", addr: "雲林縣斗六市雲林路二段297號", lat: 23.702, lng: 120.531 },
-    { name: "虎尾店", phone: "05-633-1089", addr: "雲林縣虎尾鎮立新街96號", lat: 23.707, lng: 120.443 },
-    { name: "新仁店", phone: "06-289-1265", addr: "台南市仁德區大同路三段755號", lat: 22.951, lng: 120.229 },
-    { name: "安平店", phone: "06-295-7588", addr: "台南市中西區中華西路2段16號", lat: 22.991, lng: 120.187 },
-    { name: "仁德店", phone: "06-249-6666", addr: "台南市仁德區中山路711號", lat: 22.972, lng: 120.252 },
-    { name: "中華店", phone: "06-275-6050", addr: "台南市永康區中華二路350號", lat: 23.003, lng: 120.231 },
-    { name: "中正店", phone: "06-253-8481", addr: "台南市永康區中正南路358號", lat: 23.031, lng: 120.235 },
-    { name: "新營店", phone: "06-656-9435", addr: "台南市新營區健康路251號", lat: 23.308, lng: 120.301 },
-    { name: "新楠店", phone: "07-351-8006", addr: "高雄市楠梓區土庫一路 60 號", lat: 22.742, lng: 120.337 },
-    { name: "楠梓店", phone: "07-591-1899", addr: "高雄市楠梓區藍田路288號", lat: 22.731, lng: 120.285 },
-    { name: "光華店", phone: "07-330-6189", addr: "高雄市前鎮區光華二路157號", lat: 22.610, lng: 120.318 },
-    { name: "澄清店", phone: "07-394-3858", addr: "高雄市三民區澄清路635號", lat: 22.646, lng: 120.345 },
-    { name: "成功店", phone: "07-536-9828", addr: "高雄市前鎮區中華五路1111號", lat: 22.605, lng: 120.305 },
-    { name: "鳳山店", phone: "07-740-1789", addr: "高雄市鳳山區中山西路236號", lat: 22.627, lng: 120.353 },
-    { name: "五甲店", phone: "07-713-8508", addr: "高雄市鳳山區林森路291號", lat: 22.597, lng: 120.339 },
-    { name: "愛河店", phone: "07-272-5066", addr: "高雄市三民區河東路356號", lat: 22.629, lng: 120.292 },
-    { name: "鼎山店", phone: "07-394-5588", addr: "高雄市三民區大順二路849號", lat: 22.653, lng: 120.319 },
-    { name: "金門店", phone: "08-231-2015", addr: "金門縣金寧鄉伯玉路二段223號", lat: 24.444, lng: 118.336 },
-    { name: "新屏店", phone: "08-756-0005", addr: "屏東縣屏東市台糖街3號", lat: 22.663, lng: 120.488 },
-    { name: "屏東店", phone: "08-738-0310", addr: "屏東縣屏東市仁愛路188號", lat: 22.673, lng: 120.489 },
-    { name: "台東店", phone: "08-933-3258", addr: "台東縣臺東市正氣路300之1號", lat: 22.757, lng: 121.149 },
-    { name: "花蓮店", phone: "03-826-7979", addr: "花蓮縣新城鄉嘉里路15號B1", lat: 24.015, lng: 121.611 }
-];
-
-function getDistKM(lat1, lon1, lat2, lon2) {
-    const p = 0.017453292519943295; 
-    const c = Math.cos;
-    const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2;
-    return 12742 * Math.asin(Math.sqrt(a)); 
-}
-
-async function calculateNearest() {
-    const addr = document.getElementById('custAddr').value.trim();
-    const resDiv = document.getElementById('finalResultList');
-    const btn = document.getElementById('calcBtn');
-
-    if (!addr) { alert("請輸入客人地址"); return; }
-    btn.innerText = "計算中...";
-    resDiv.innerHTML = "正在比對 60 多家店面位置...";
-
-    try {
-        const searchTerms = [addr, addr.substring(0, 10)];
-        let data = [];
-        for (let term of searchTerms) {
-            const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(term)}&limit=1`);
-            data = await resp.json();
-            if (data.length > 0) break;
-        }
-
-        if (data.length > 0) {
-            const uLat = parseFloat(data[0].lat);
-            const uLng = parseFloat(data[0].lon);
-
-            const sorted = storeDatabase.map(s => ({
-                ...s,
-                dist: getDistKM(uLat, uLng, s.lat, s.lng)
-            })).sort((a, b) => a.dist - b.dist).slice(0, 3);
-
-            let html = '<div style="border-top: 1px solid #eee; padding-top: 10px;">';
-            sorted.forEach((s, i) => {
-                html += `
-                <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'};">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <div style="font-weight:bold; font-size: 1.1rem; color:${i === 0 ? '#1a73e8' : '#333'};">${i === 0 ? '🏆 最近：' : ''}${s.name}</div>
-                            <div style="font-size: 13px; color: #666; margin: 4px 0;">${s.addr}</div>
-                        </div>
-                        <div style="text-align: right; min-width: 80px;">
-                            <div style="font-weight: bold; color: #d93025; font-size: 1.2rem;">${s.dist.toFixed(1)} km</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 10px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">📞 撥打電話</a>
-                        <a href="https://maps.google.com/?cid=4066510683105161706&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQ{encodeURIComponent(s.addr)}" target="_blank" style="flex: 1; text-align: center; padding: 10px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">🗺️ 導航</a>
-                    </div>
-                </div>`;
-            });
-            resDiv.innerHTML = html + '</div>';
-        } else {
-            resDiv.innerHTML = "<p style='color:red;'>查無地址座標，請試著輸入「縣市+路名就好」。</p>";
-        }
-    } catch (e) {
-        resDiv.innerHTML = "<p style='color:red;'>系統忙碌，請稍後再試。</p>";
-    }
-    btn.innerText = "🔍 計算最近門市";
-}
-</script>
     /* 標頭容器 - 固定在上方 */
     .header-container { 
         position: sticky; 
@@ -343,7 +200,7 @@ async function calculateNearest() {
 
     <div id="store-finder-section" style="padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: -apple-system, sans-serif;">
         <h4 style="margin: 0 0 12px 0; color: #1a73e8; font-size: 1.2rem;">🚚 快速出貨分店查詢</h4>
-        <input type="text" id="custAddr" placeholder="輸入客人地址 (例: 名間鄉外埔巷)" 
+        <input type="text" id="custAddr" placeholder="輸入客人地址 (例: 南投縣名間鄉)" 
                inputmode="search"
                style="width: 100%; padding: 15px; border: 2px solid #e1e4e8; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
         <button onclick="calculateNearest()" id="calcBtn"
@@ -370,6 +227,131 @@ async function calculateNearest() {
     </div>
 
     <script>
+        const storeDatabase = [
+    { name: "南港店", phone: "02-2653-0598", addr: "台北市南港區南港路二段146號B2", lat: 25.052, lng: 121.592 },
+    { name: "三民店", phone: "02-2767-0702", addr: "台北市松山區三民路160號", lat: 25.061, lng: 121.562 },
+    { name: "內湖店", phone: "02-8790-5000", addr: "台北市內湖區民善街88號", lat: 25.062, lng: 121.576 },
+    { name: "桂林店", phone: "02-2388-9887", addr: "台北市萬華區桂林路1號", lat: 25.038, lng: 121.506 },
+    { name: "重慶店", phone: "02-2553-7389", addr: "台北市大同區重慶北路二段171號", lat: 25.058, lng: 121.514 },
+    { name: "天母店", phone: "02-2833-8042", addr: "台北市士林區德行西路47號", lat: 25.103, lng: 121.521 },
+    { name: "北大店", phone: "02-3501-6879", addr: "新北市樹林區大雅路288號B1", lat: 24.945, lng: 121.378 },
+    { name: "林口店", phone: "02-2602-5858", addr: "新北市林口區文化二路一段559號B1", lat: 25.078, lng: 121.379 },
+    { name: "新店店", phone: "02-8919-3333", addr: "新北市新店區中興路三段1號", lat: 24.976, lng: 121.546 },
+    { name: "樹林店", phone: "02-2681-0000", addr: "新北市樹林區大安路118號", lat: 24.997, lng: 121.421 },
+    { name: "土城店", phone: "02-2265-6001", addr: "新北市土城區青雲路152號B1", lat: 24.985, lng: 121.455 },
+    { name: "中和店", phone: "02-8245-5566", addr: "新北市中和區中山路二段295號B1", lat: 25.001, lng: 121.496 },
+    { name: "板橋店", phone: "02-2964-2988", addr: "新北市板橋區三民路二段31號B1", lat: 25.019, lng: 121.478 },
+    { name: "中平店", phone: "02-8992-5678", addr: "新北市新莊區中平路108號B1", lat: 25.048, lng: 121.445 },
+    { name: "蘆洲店", phone: "02-8287-9000", addr: "新北市三重區五華街282號", lat: 25.087, lng: 121.492 },
+    { name: "重新店", phone: "02-2999-5000", addr: "新北市三重區重新路五段654號", lat: 25.044, lng: 121.465 },
+    { name: "汐科店", phone: "02-2697-1098", addr: "新北市汐止區新台五路一段99號B1", lat: 25.062, lng: 121.649 },
+    { name: "淡新店", phone: "02-8631-8880", addr: "新北市淡水區中山北路二段383號", lat: 25.183, lng: 121.444 },
+    { name: "宜蘭店", phone: "03-936-1188", addr: "宜蘭縣宜蘭市民權路二段38巷2號B2", lat: 24.754, lng: 121.751 },
+    { name: "青埔店", phone: "03-2876-020", addr: "桃園市中壢區高鐵南路2段352號2樓", lat: 24.991, lng: 121.214 },
+    { name: "八德店", phone: "03-361-1385", addr: "桃園市八德區介壽路一段728號B2", lat: 24.957, lng: 121.298 },
+    { name: "中原店", phone: "03-4334601", addr: "桃園市中壢區中華路二段501號", lat: 24.969, lng: 121.248 },
+    { name: "經國店", phone: "03-316-0676", addr: "桃園市桃園區經國路369號", lat: 25.021, lng: 121.299 },
+    { name: "內壢店", phone: "03-452-6000", addr: "桃園市中壢區中華路一段450號", lat: 24.975, lng: 121.258 },
+    { name: "中壢店", phone: "03-456-2149", addr: "桃園市中壢區中山東路二段510號", lat: 24.949, lng: 121.238 },
+    { name: "平鎮店", phone: "03-469-0288", addr: "桃園市平鎮區坤慶路1號", lat: 24.912, lng: 121.192 },
+    { name: "苗栗店", phone: "03-733-3000", addr: "苗栗縣苗栗市國華路599號", lat: 24.571, lng: 120.825 },
+    { name: "西屯店", phone: "04-2465-2028", addr: "台中市西屯區台灣大道四段1086號", lat: 24.181, lng: 120.612 },
+    { name: "豐原店", phone: "04-2526-5151", addr: "台中市豐原區成功路500號", lat: 24.246, lng: 120.710 },
+    { name: "太平店", phone: "04-2277-8068", addr: "台中市太平區中平七街70號", lat: 24.127, lng: 120.713 },
+    { name: "文心店", phone: "04-2254-3355", addr: "台中市南屯區文心路一段521號", lat: 24.148, lng: 120.643 },
+    { name: "青海店", phone: "04-2707-3866", addr: "台中市西屯區青海路二段207-18號", lat: 24.170, lng: 120.644 },
+    { name: "德安店", phone: "04-2223-6677", addr: "台中市東區復興路4段186號B1", lat: 24.136, lng: 120.687 },
+    { name: "大墩店", phone: "04-2310-8467", addr: "台中市南屯區大墩路533號B1", lat: 24.152, lng: 120.648 },
+    { name: "中清店", phone: "04-2426-2555", addr: "台中市西屯區中清路三段436號", lat: 24.195, lng: 120.645 },
+    { name: "沙鹿店", phone: "04-2665-2300", addr: "台中市沙鹿區光華路336號", lat: 24.238, lng: 120.565 },
+    { name: "彰化店", phone: "04-736-7397", addr: "彰化縣彰化市金馬路二段321號", lat: 24.092, lng: 120.546 },
+    { name: "南投店", phone: "04-9224-5318", addr: "南投縣南投市三和三路21號", lat: 23.906, lng: 120.686 },
+    { name: "埔里店", phone: "04-9291-2088", addr: "南投縣埔里鎮信義路1029號", lat: 23.968, lng: 120.959 },
+    { name: "嘉義店", phone: "05-235-3606", addr: "嘉義市西區博愛路二段461號", lat: 23.475, lng: 120.434 },
+    { name: "北港店", phone: "05-783-0163", addr: "雲林縣北港鎮華南路101號", lat: 23.565, lng: 120.301 },
+    { name: "斗六店", phone: "05-537-5500", addr: "雲林縣斗六市雲林路二段297號", lat: 23.702, lng: 120.531 },
+    { name: "虎尾店", phone: "05-633-1089", addr: "雲林縣虎尾鎮立新街96號", lat: 23.707, lng: 120.443 },
+    { name: "新仁店", phone: "06-289-1265", addr: "台南市仁德區大同路三段755號", lat: 22.951, lng: 120.229 },
+    { name: "安平店", phone: "06-295-7588", addr: "台南市中西區中華西路2段16號", lat: 22.991, lng: 120.187 },
+    { name: "仁德店", phone: "06-249-6666", addr: "台南市仁德區中山路711號", lat: 22.972, lng: 120.252 },
+    { name: "中華店", phone: "06-275-6050", addr: "台南市永康區中華二路350號", lat: 23.003, lng: 120.231 },
+    { name: "中正店", phone: "06-253-8481", addr: "台南市永康區中正南路358號", lat: 23.031, lng: 120.235 },
+    { name: "新營店", phone: "06-656-9435", addr: "台南市新營區健康路251號", lat: 23.308, lng: 120.301 },
+    { name: "新楠店", phone: "07-351-8006", addr: "高雄市楠梓區土庫一路 60 號", lat: 22.742, lng: 120.337 },
+    { name: "楠梓店", phone: "07-591-1899", addr: "高雄市楠梓區藍田路288號", lat: 22.731, lng: 120.285 },
+    { name: "光華店", phone: "07-330-6189", addr: "高雄市前鎮區光華二路157號", lat: 22.610, lng: 120.318 },
+    { name: "澄清店", phone: "07-394-3858", addr: "高雄市三民區澄清路635號", lat: 22.646, lng: 120.345 },
+    { name: "成功店", phone: "07-536-9828", addr: "高雄市前鎮區中華五路1111號", lat: 22.605, lng: 120.305 },
+    { name: "鳳山店", phone: "07-740-1789", addr: "高雄市鳳山區中山西路236號", lat: 22.627, lng: 120.353 },
+    { name: "五甲店", phone: "07-713-8508", addr: "高雄市鳳山區林森路291號", lat: 22.597, lng: 120.339 },
+    { name: "愛河店", phone: "07-272-5066", addr: "高雄市三民區河東路356號", lat: 22.629, lng: 120.292 },
+    { name: "鼎山店", phone: "07-394-5588", addr: "高雄市三民區大順二路849號", lat: 22.653, lng: 120.319 },
+    { name: "金門店", phone: "08-231-2015", addr: "金門縣金寧鄉伯玉路二段223號", lat: 24.444, lng: 118.336 },
+    { name: "新屏店", phone: "08-756-0005", addr: "屏東縣屏東市台糖街3號", lat: 22.663, lng: 120.488 },
+    { name: "屏東店", phone: "08-738-0310", addr: "屏東縣屏東市仁愛路188號", lat: 22.673, lng: 120.489 },
+    { name: "台東店", phone: "08-933-3258", addr: "台東縣臺東市正氣路300之1號", lat: 22.757, lng: 121.149 },
+    { name: "花蓮店", phone: "03-826-7979", addr: "花蓮縣新城鄉嘉里路15號B1", lat: 24.015, lng: 121.611 }
+];
+        // A. 計算距離的核心公式 (哈佛線公式)
+function getDistKM(lat1, lon1, lat2, lon2) {
+    const p = 0.017453292519943295; 
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2;
+    return 12742 * Math.asin(Math.sqrt(a)); 
+}
+
+// B. 快速出貨分店計算主功能
+async function calculateNearest() {
+    const addr = document.getElementById('custAddr').value.trim();
+    const resDiv = document.getElementById('finalResultList');
+    const btn = document.getElementById('calcBtn');
+
+    if (!addr) { alert("請輸入客人地址 (例如: 名間鄉)"); return; }
+    
+    btn.innerText = "⏳ 計算中...";
+    btn.style.opacity = "0.7";
+    resDiv.innerHTML = "正在比對分店位置...";
+
+    try {
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`);
+        const data = await resp.json();
+
+        if (data.length > 0) {
+            const uLat = parseFloat(data[0].lat);
+            const uLng = parseFloat(data[0].lon);
+
+            const sorted = storeDatabase.map(s => ({
+                ...s,
+                dist: getDistKM(uLat, uLng, s.lat, s.lng)
+            })).sort((a, b) => a.dist - b.dist).slice(0, 3);
+
+            let html = '<div style="margin-top: 10px;">';
+            sorted.forEach((s, i) => {
+                // 注意這裡修正了 ${} 的用法
+                html += `
+                <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="font-weight:bold; font-size: 1.1rem; color:${i === 0 ? '#1a73e8' : '#333'};">
+                        ${i === 0 ? '🏆 最近分店：' : ''}${s.name} 
+                        <span style="font-size: 0.9rem; color: #666;">(約 ${s.dist.toFixed(1)} km)</span>
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">📞 撥電話</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
+                    </div>
+                </div>`;
+            });
+            resDiv.innerHTML = html + '</div>';
+        } else {
+            resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」即可。</p>";
+        }
+    } catch (e) {
+        resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>⚠️ 網路連線錯誤，請檢查網路後重試。</p>";
+    } finally {
+        btn.innerText = "🔍 計算最近門市";
+        btn.style.opacity = "1";
+    }
+}
         // ==========================================
         // 請將您之前的 rawData 貼在下面這裡
         // ==========================================
@@ -1643,6 +1625,7 @@ model: "NA-120EB,NA-110EB,NA-90EB",
     </script>
 </body>
 </html>
+
 
 
 
