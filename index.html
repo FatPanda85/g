@@ -226,19 +226,19 @@
         </div>
         <div id="giftContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;"></div>
 
-<div id="barcodeModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85);">
-    <div style="background:white; width:90%; max-width:400px; margin:20% auto; padding:25px; border-radius:15px; text-align:center; position:relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+<div id="barcodeModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+    <div style="background:white; width:92%; max-width:400px; margin:15% auto; padding:20px; border-radius:15px; text-align:center; position:relative;">
         <span onclick="closeModal('barcodeModal')" style="position:absolute; right:15px; top:5px; font-size:32px; cursor:pointer; color:#888;">&times;</span>
         
-        <h3 style="margin:0 0 15px 0; color:#333;">結帳條碼</h3>
+        <h3 style="margin:10px 0; color:#333;">結帳條碼 (EAN-13)</h3>
         
-        <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
-            <svg id="barcodeCanvas" style="max-width: 100%;"></svg>
+        <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px; display: flex; justify-content: center;">
+            <svg id="barcodeCanvas"></svg>
         </div>
         
         <p id="barcodeNum" style="font-weight:bold; font-size:1.4rem; color:#1a73e8; margin:10px 0; letter-spacing: 2px;"></p>
         
-        <button onclick="closeModal('barcodeModal')" style="width:100%; padding:15px; background:#444; color:white; border:none; border-radius:10px; font-size:1.1rem; font-weight:bold; margin-top:10px;">關閉</button>
+        <button onclick="closeModal('barcodeModal')" style="width:100%; padding:15px; background:#444; color:white; border:none; border-radius:10px; font-weight:bold;">關閉</button>
     </div>
 </div>
     </div>
@@ -1656,31 +1656,35 @@ function renderGifts(data) {
  // 1. 修正後的條碼放大功能
 function zoomBarcode(code) {
     const modal = document.getElementById('barcodeModal');
-    const canvas = document.getElementById('barcodeCanvas');
-    
     if (modal) {
-        // 1. 先顯示視窗，JsBarcode 才抓得到寬度畫圖
         modal.style.display = 'block'; 
         
-        // 2. 延遲一小下（10毫秒）確保瀏覽器已經渲染出 modal 
-        setTimeout(() => {
-            try {
-                JsBarcode("#barcodeCanvas", code, { 
-                    format: "CODE128", 
-                    width: 2.5, 
-                    height: 100, 
-                    displayValue: false 
-                });
-                
-                // 3. 填入條碼文字
-                const numElem = document.getElementById('barcodeNum');
-                if (numElem) numElem.innerText = code;
-            } catch (err) {
-                console.error("條碼產生失敗:", err);
-            }
-        }, 10);
-    } else {
-        alert("找不到條碼視窗(barcodeModal)，請檢查 HTML！");
+        // EAN-13 專用設定
+        try {
+            JsBarcode("#barcodeCanvas", code, { 
+                format: "EAN13",    // 強制指定為 EAN13
+                width: 2.2,         // 手機版建議寬度，避免超出螢幕
+                height: 100, 
+                displayValue: true, // EAN-13 通常建議直接顯示下方數字
+                fontSize: 18,
+                background: "#f9f9f9",
+                flat: true          // 讓條碼更清晰
+            });
+            
+            // 同步更新下方的文字區（如果需要額外顯示大字）
+            const numElem = document.getElementById('barcodeNum');
+            if (numElem) numElem.innerText = code;
+
+            // 強制畫布置中
+            const canvas = document.getElementById('barcodeCanvas');
+            canvas.style.display = "block";
+            canvas.style.margin = "0 auto";
+            canvas.style.maxWidth = "100%"; // 確保不超出手機邊界
+            
+        } catch (err) {
+            console.error("條碼格式錯誤：EAN-13 僅支援 13 位數字", err);
+            alert("此條碼非 13 位數字，無法使用 EAN-13 格式顯示");
+        }
     }
 }
 
@@ -1735,6 +1739,7 @@ function showQrCode(url, title, hint) {
 </div>
 </body>
 </html>
+
 
 
 
