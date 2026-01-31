@@ -1826,7 +1826,21 @@ function renderGifts(data) {
     });
 }
 
-        function zoomImg(src) { if(!src) return; document.getElementById('zoomedImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
+       function zoomImg(src) {
+    if (!src) return;
+    const overlay = document.getElementById('imgOverlay');
+    const img = document.getElementById('zoomedImg');
+    
+    if (overlay && img) {
+        img.src = src; // 把點擊的小圖網址傳給大圖框
+        overlay.style.display = 'flex'; // 顯示大圖框
+    }
+}
+
+// 這是專門給圖片放大用的關閉函數
+function closeOverlay(id) {
+    document.getElementById(id).style.display = 'none';
+}
  // 1. 修正後的條碼放大功能
 function zoomBarcode(code) {
     const modal = document.getElementById('barcodeModal');
@@ -1911,8 +1925,15 @@ function showQrCode(url, title, hint) {
         <button onclick="closeModal('qrCodeOverlay')" style="width:100%; padding:15px; background:#1a73e8; color:white; border:none; border-radius:10px; font-size:1.1rem; font-weight:bold; margin-top:10px;">確定</button>
     </div>
 </div>
+<div id="imgOverlay" class="modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center;" onclick="closeOverlay('imgOverlay')">
+    <div style="position:relative; max-width:90%; max-height:90%;">
+        <span style="position:absolute; right:-10px; top:-40px; color:white; font-size:40px; cursor:pointer;">&times;</span>
+        <img id="zoomedImg" src="" style="width:100%; height:auto; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+    </div>
+</div>
 </body>
 </html>
+
 
 
 
