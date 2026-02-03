@@ -200,8 +200,7 @@
 
     <div id="store-finder-section" style="padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: -apple-system, sans-serif;">
         <h4 style="margin: 0 0 12px 0; color: #1a73e8; font-size: 1.2rem;">🚚 快速出貨分店查詢</h4>
-        <input type="text" id="custAddr" placeholder="輸入客人地址 (        <input type="text" id="custAddr" placeholder=例: ＸＸ縣ＸＸ區
-)" 
+        <input type="text" id="custAddr" placeholder="輸入客人地址 (例: 南投縣名間鄉)" 
                inputmode="search"
                style="width: 100%; padding: 15px; border: 2px solid #e1e4e8; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
         <button onclick="calculateNearest()" id="calcBtn"
@@ -311,13 +310,6 @@
     { name: "花蓮店", phone: "03-826-7979", addr: "花蓮縣新城鄉嘉里路15號B1", lat: 24.015, lng: 121.611 }
 ];
         // A. 計算距離的核心公式 (哈佛線公式)
-function getDistKM(lat1, lon1, lat2, lon2) {
-    const p = 0.017453292519943295; 
-    const c = Math.cos;
-    const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2;
-    return 12742 * Math.asin(Math.sqrt(a)); 
-}
-
 async function calculateNearest() {
     const addr = document.getElementById('custAddr').value.trim();
     const resDiv = document.getElementById('finalResultList');
@@ -344,7 +336,7 @@ async function calculateNearest() {
 
             let htmlOutput = '<div style="margin-top: 10px;">';
             sorted.forEach((s, i) => {
-                // 修正點 1：這裡一定要加上 $ 符號
+                // 修正原代碼的 URL 寫法
                 const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`;
                 
                 htmlOutput += `
@@ -354,9 +346,13 @@ async function calculateNearest() {
                         <span style="font-size: 0.9rem; color: #666;">(約 ${s.dist.toFixed(1)} km)</span>
                     </div>
                     <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">📞 撥電話</a>
-                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
+                    
+                    <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                        <a href="tel:${s.phone}" style="flex: 1; min-width: 80px; text-align: center; padding: 12px 5px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">📞 撥電話</a>
+                        
+                        <button onclick="showFeeDetail('${s.name}')" style="flex: 1; min-width: 80px; text-align: center; padding: 12px 5px; background: #d93025; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: pointer;">💰 運費表</button>
+                        
+                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; min-width: 80px; text-align: center; padding: 12px 5px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">🗺️ 導航</a>
                     </div>
                 </div>`;
             });
@@ -1986,6 +1982,7 @@ function showQrCode(url, title, hint) {
 </div>
 </body>
 </html>
+
 
 
 
