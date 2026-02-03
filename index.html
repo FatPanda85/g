@@ -374,6 +374,46 @@ async function calculateNearest() {
         // ==========================================
         // 請將您之前的 rawData 貼在下面這裡
         // ==========================================
+        function showFeeDetail(storeName) {
+    // 未來你可以在這裡無限擴充店名
+    const feeDatabase = {
+        "台中店": [
+            { fee: "運費 $0", zones: "舊台中市區" },
+            { fee: "運費 $100", zones: "北屯、西屯、南屯、大里、太平、霧峰、烏日\n(如未達9公里(含)不收跨區費)" },
+            { fee: "運費 $200", zones: "大雅、潭子" }
+        ],
+        "新店店": [
+            { fee: "運費 $0", zones: "新店區、文山區、大安區、中和、永和、板橋" },
+            { fee: "運費 $200", zones: "信義區、大同區、萬華區、中正區、中山區、土城、深坑、新店(過屈尺社區【含】)、大台北華城" }
+        ]
+    };
+
+    const overlay = document.getElementById('feeOverlay');
+    const content = document.getElementById('feeContent');
+    const title = document.getElementById('feeTitle');
+
+    if (overlay && content) {
+        title.innerHTML = `🚛 <strong>${storeName}</strong> 運費表`;
+        content.innerHTML = ''; // 清空內容
+
+        const storeData = feeDatabase[storeName];
+        if (storeData) {
+            storeData.forEach(item => {
+                const segment = document.createElement('div');
+                // 這裡設定卡片樣式：白底、圓角、陰影
+                segment.style.cssText = "background:white; padding:15px; border-radius:12px; text-align:left; box-shadow: 0 2px 5px rgba(0,0,0,0.05);";
+                segment.innerHTML = `
+                    <div style="color:#d93025; font-weight:bold; font-size:1.1rem; margin-bottom:8px; text-align:center;">${item.fee}</div>
+                    <div style="color:#555; font-size:0.95rem; line-height:1.6; border-top:1px solid #eee; padding-top:10px; white-space: pre-line;">${item.zones}</div>
+                `;
+                content.appendChild(segment);
+            });
+        } else {
+            content.innerHTML = `<div style="padding:20px; color:#999;">目前尚無此店詳細運費資料</div>`;
+        }
+        overlay.style.display = 'flex';
+    }
+}
         const rawData = [
        { 
                 cat: "常用條碼", brand: "冷氣運費", 
@@ -1931,8 +1971,21 @@ function showQrCode(url, title, hint) {
         <img id="zoomedImg" src="" style="width:100%; height:auto; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
     </div>
 </div>
+    <div id="feeOverlay" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+    <div style="background:#f4f4f4; width:92%; max-width:400px; padding:20px; border-radius:20px; text-align:center; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <span onclick="closeModal('feeOverlay')" style="position:absolute; right:15px; top:10px; font-size:32px; cursor:pointer; color:#999;">&times;</span>
+        
+        <h3 id="feeTitle" style="margin:10px 0 20px 0; color:#333; font-size:1.4rem;">🚛 店別運費表</h3>
+        
+        <div id="feeContent" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+        </div>
+        
+        <button onclick="closeModal('feeOverlay')" style="width:100%; padding:15px; background:#444; color:white; border:none; border-radius:12px; font-size:1.1rem; font-weight:bold; margin-top:20px;">關閉視窗</button>
+    </div>
+</div>
 </body>
 </html>
+
 
 
 
