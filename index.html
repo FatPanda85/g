@@ -316,6 +316,13 @@
     { name: "花蓮店", phone: "03-826-7979", addr: "花蓮縣新城鄉嘉里路15號B1", lat: 24.015, lng: 121.611 }
 ];
         // A. 計算距離的核心公式 (哈佛線公式)
+function getDistKM(lat1, lon1, lat2, lon2) {
+    const p = 0.017453292519943295; 
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2;
+    return 12742 * Math.asin(Math.sqrt(a)); 
+}
+
 async function calculateNearest() {
     const addr = document.getElementById('custAddr').value.trim();
     const resDiv = document.getElementById('finalResultList');
@@ -323,22 +330,18 @@ async function calculateNearest() {
 
     if (!addr) { alert("請輸入客人地址 (例如: 名間鄉)"); return; }
     
-    btn.innerText = "⏳ 正在尋找位址...";
+    btn.innerText = "⏳ 計算中...";
     btn.style.opacity = "0.7";
     resDiv.innerHTML = "正在比對分店位置...";
 
     try {
-        // 使用 Nominatim 免費服務，加上 User-Agent 避免被鎖 IP
-        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`, {
-            headers: { 'Accept-Language': 'zh-TW' }
-        });
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`);
         const data = await resp.json();
 
         if (data.length > 0) {
             const uLat = parseFloat(data[0].lat);
             const uLng = parseFloat(data[0].lon);
 
-            // 計算距離並排序
             const sorted = storeDatabase.map(s => ({
                 ...s,
                 dist: getDistKM(uLat, uLng, s.lat, s.lng)
@@ -346,7 +349,7 @@ async function calculateNearest() {
 
             let htmlOutput = '<div style="margin-top: 10px;">';
             sorted.forEach((s, i) => {
-                // 修正後的 Google 地圖導航連結 (一樣免費)
+                // 修正點 1：這裡一定要加上 $ 符號
                 const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`;
                 
                 htmlOutput += `
@@ -356,20 +359,19 @@ async function calculateNearest() {
                         <span style="font-size: 0.9rem; color: #666;">(約 ${s.dist.toFixed(1)} km)</span>
                     </div>
                     <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
-                    <div style="display: flex; gap: 8px; margin-top: 10px;">
-                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">📞 撥電話</a>
-                        <button onclick="showFeeDetail('${s.name}')" style="flex: 1; padding: 12px; background: #fff1f0; color: #d93025; border: 1px solid #ffa39e; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: pointer;">💰 跨區費</button>
-                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">🗺️ 導航</a>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">📞 撥電話</a>
+                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
                     </div>
                 </div>`;
             });
             resDiv.innerHTML = htmlOutput + '</div>';
         } else {
-            resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」。</p>";
+            resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」即可。</p>";
         }
     } catch (e) {
         console.error(e);
-        resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>⚠️ 服務忙碌中，請等 5 秒後重試或換個網路。</p>";
+        resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>⚠️ 網路連線錯誤，請檢查網路後重試。</p>";
     } finally {
         btn.innerText = "🔍 計算最近門市";
         btn.style.opacity = "1";
@@ -1988,6 +1990,7 @@ function showQrCode(url, title, hint) {
 </div>
 </body>
 </html>
+
 
 
 
