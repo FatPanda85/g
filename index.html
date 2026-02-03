@@ -323,22 +323,22 @@ async function calculateNearest() {
 
     if (!addr) { alert("請輸入客人地址 (例如: 名間鄉)"); return; }
     
-    // --- 1. 開始狀態 ---
-    btn.innerText = "⏳ 計算中...";
-    btn.disabled = true; // 鎖定按鈕防止重複點擊
+    btn.innerText = "⏳ 正在尋找位址...";
     btn.style.opacity = "0.7";
     resDiv.innerHTML = "正在比對分店位置...";
 
     try {
-        // 使用 OpenStreetMap 的免費 API 進行地址解析
-        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`);
+        // 使用 Nominatim 免費服務，加上 User-Agent 避免被鎖 IP
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`, {
+            headers: { 'Accept-Language': 'zh-TW' }
+        });
         const data = await resp.json();
 
         if (data.length > 0) {
             const uLat = parseFloat(data[0].lat);
             const uLng = parseFloat(data[0].lon);
 
-            // 計算距離並排序，取最近的前 3 名
+            // 計算距離並排序
             const sorted = storeDatabase.map(s => ({
                 ...s,
                 dist: getDistKM(uLat, uLng, s.lat, s.lng)
@@ -346,8 +346,8 @@ async function calculateNearest() {
 
             let htmlOutput = '<div style="margin-top: 10px;">';
             sorted.forEach((s, i) => {
-                // ✅ 修正後的 Google Map 導航網址 (更精準的格式)
-                const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + ' ' + s.addr)}`;
+                // 修正後的 Google 地圖導航連結 (一樣免費)
+                const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`;
                 
                 htmlOutput += `
                 <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
@@ -356,27 +356,22 @@ async function calculateNearest() {
                         <span style="font-size: 0.9rem; color: #666;">(約 ${s.dist.toFixed(1)} km)</span>
                     </div>
                     <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
-                    
-                    <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
-                        <a href="tel:${s.phone}" style="flex: 1; min-width: 80px; text-align: center; padding: 12px 5px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">📞 撥電話</a>
-                        
-                        <button onclick="showFeeDetail('${s.name}')" style="flex: 1; min-width: 80px; text-align: center; padding: 12px 5px; background: #d93025; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: pointer;">💰 運費表</button>
-                        
-                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; min-width: 80px; text-align: center; padding: 12px 5px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">🗺️ 導航</a>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">📞 撥電話</a>
+                        <button onclick="showFeeDetail('${s.name}')" style="flex: 1; padding: 12px; background: #fff1f0; color: #d93025; border: 1px solid #ffa39e; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: pointer;">💰 跨區費</button>
+                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">🗺️ 導航</a>
                     </div>
                 </div>`;
             });
             resDiv.innerHTML = htmlOutput + '</div>';
         } else {
-            resDiv.innerHTML = "<div style='color:#d93025; background:#fce8e6; padding:15px; border-radius:10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」即可。</div>";
+            resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」。</p>";
         }
     } catch (e) {
         console.error(e);
-        resDiv.innerHTML = "<div style='color:#d93025; background:#fce8e6; padding:15px; border-radius:10px;'>⚠️ 網路連線錯誤，請檢查網路或 API 限制後重試。</div>";
+        resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>⚠️ 服務忙碌中，請等 5 秒後重試或換個網路。</p>";
     } finally {
-        // --- 恢復狀態 ---
         btn.innerText = "🔍 計算最近門市";
-        btn.disabled = false;
         btn.style.opacity = "1";
     }
 }
@@ -1993,6 +1988,7 @@ function showQrCode(url, title, hint) {
 </div>
 </body>
 </html>
+
 
 
 
