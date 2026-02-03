@@ -198,17 +198,23 @@
 </head>
 <body>
 
-    <div id="store-finder-section" style="padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: -apple-system, sans-serif;">
-        <h4 style="margin: 0 0 12px 0; color: #1a73e8; font-size: 1.2rem;">🚚 快速出貨分店查詢</h4>
-        <input type="text" id="custAddr" placeholder="輸入客人地址 (例: 南投縣名間鄉)" 
-               inputmode="search"
-               style="width: 100%; padding: 15px; border: 2px solid #e1e4e8; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
-        <button onclick="calculateNearest()" id="calcBtn"
-                style="width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer;">
+    <div class="card">
+    <h3>🚛 快速出貨分店查詢</h3>
+    
+    <div class="search-section" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;">
+        <input type="text" id="custAddr" placeholder="輸入地址 (例: 新北市新店區)" 
+               style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 1.1rem; margin-bottom: 15px; box-sizing: border-box;">
+        
+        <button id="calcBtn" onclick="calculateNearest()" 
+                style="width: 100%; padding: 15px; background: #3b71db; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">
             🔍 計算最近門市
         </button>
-        <div id="finalResultList" style="margin-top: 15px;"></div>
+        
+        <div id="statusMessage" style="font-weight: bold; margin-top: 15px; text-align: center;"></div>
     </div>
+
+    <div id="finalResultList" style="margin-top: 20px;"></div>
+</div>
 
     <div class="header-container">
         <div class="search-row">
@@ -317,11 +323,14 @@ async function calculateNearest() {
 
     if (!addr) { alert("請輸入客人地址 (例如: 名間鄉)"); return; }
     
+    // --- 1. 開始狀態 ---
     btn.innerText = "⏳ 計算中...";
+    btn.disabled = true; // 鎖定按鈕防止重複點擊
     btn.style.opacity = "0.7";
     resDiv.innerHTML = "正在比對分店位置...";
 
     try {
+        // 使用 OpenStreetMap 的免費 API 進行地址解析
         const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`);
         const data = await resp.json();
 
@@ -329,6 +338,7 @@ async function calculateNearest() {
             const uLat = parseFloat(data[0].lat);
             const uLng = parseFloat(data[0].lon);
 
+            // 計算距離並排序，取最近的前 3 名
             const sorted = storeDatabase.map(s => ({
                 ...s,
                 dist: getDistKM(uLat, uLng, s.lat, s.lng)
@@ -336,8 +346,8 @@ async function calculateNearest() {
 
             let htmlOutput = '<div style="margin-top: 10px;">';
             sorted.forEach((s, i) => {
-                // 修正原代碼的 URL 寫法
-                const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`;
+                // ✅ 修正後的 Google Map 導航網址 (更精準的格式)
+                const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + ' ' + s.addr)}`;
                 
                 htmlOutput += `
                 <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
@@ -358,13 +368,15 @@ async function calculateNearest() {
             });
             resDiv.innerHTML = htmlOutput + '</div>';
         } else {
-            resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」即可。</p>";
+            resDiv.innerHTML = "<div style='color:#d93025; background:#fce8e6; padding:15px; border-radius:10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」即可。</div>";
         }
     } catch (e) {
         console.error(e);
-        resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>⚠️ 網路連線錯誤，請檢查網路後重試。</p>";
+        resDiv.innerHTML = "<div style='color:#d93025; background:#fce8e6; padding:15px; border-radius:10px;'>⚠️ 網路連線錯誤，請檢查網路或 API 限制後重試。</div>";
     } finally {
+        // --- 恢復狀態 ---
         btn.innerText = "🔍 計算最近門市";
+        btn.disabled = false;
         btn.style.opacity = "1";
     }
 }
@@ -374,17 +386,16 @@ async function calculateNearest() {
         function showFeeDetail(storeName) {
     // 未來你可以在這裡無限擴充店名
     const feeDatabase = {
-        "台中店": [
-            { fee: "運費 $0", zones: "舊台中市區" },
-            { fee: "運費 $100", zones: "北屯、西屯、南屯、大里、太平、霧峰、烏日\n(如未達9公里(含)不收跨區費)" },
-            { fee: "運費 $200", zones: "大雅、潭子" }
-        ],
-        "新店店": [
-            { fee: "運費 $0", zones: "新店區、文山區、大安區、中和、永和、板橋" },
-            { fee: "運費 $200", zones: "信義區、大同區、萬華區、中正區、中山區、土城、深坑、新店(過屈尺社區【含】)、大台北華城" }
-        ]
-    };
-
+    "台中店": [
+        { fee: "運費 $0", zones: "舊台中市區" },
+        { fee: "運費 $100", zones: "北屯、西屯、南屯、大里\n太平、霧峰、烏日\n(如未達9公里(含)不收跨區費)" }, // 這裡加換行
+        { fee: "運費 $200", zones: "大雅、潭子" }
+    ],
+    "新店店": [
+        { fee: "運費 $0", zones: "新店區、文山區、大安區\n中和、永和、板橋" },
+        { fee: "運費 $200", zones: "信義區、大同區、萬華區\n中正區、中山區、土城\n深坑、大台北華城\n新店(過屈尺社區【含】)" }
+    ]
+};
     const overlay = document.getElementById('feeOverlay');
     const content = document.getElementById('feeContent');
     const title = document.getElementById('feeTitle');
@@ -1968,20 +1979,21 @@ function showQrCode(url, title, hint) {
         <img id="zoomedImg" src="" style="width:100%; height:auto; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
     </div>
 </div>
-    <div id="feeOverlay" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+<div id="feeOverlay" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
     <div style="background:#f4f4f4; width:92%; max-width:400px; padding:20px; border-radius:20px; text-align:center; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
         <span onclick="closeModal('feeOverlay')" style="position:absolute; right:15px; top:10px; font-size:32px; cursor:pointer; color:#999;">&times;</span>
         
         <h3 id="feeTitle" style="margin:10px 0 20px 0; color:#333; font-size:1.4rem;">🚛 店別運費表</h3>
         
-        <div id="feeContent" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
-        </div>
+        <div id="feeContent" style="max-height: 450px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 15px; padding: 5px;">
+            </div>
         
         <button onclick="closeModal('feeOverlay')" style="width:100%; padding:15px; background:#444; color:white; border:none; border-radius:12px; font-size:1.1rem; font-weight:bold; margin-top:20px;">關閉視窗</button>
     </div>
 </div>
 </body>
 </html>
+
 
 
 
