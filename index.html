@@ -351,20 +351,24 @@ async function calculateNearest() {
             sorted.forEach((s, i) => {
                 // 修正點 1：這裡一定要加上 $ 符號
                 const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`;
-                
-                htmlOutput += `
-                <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="font-weight:bold; font-size: 1.1rem; color:${i === 0 ? '#1a73e8' : '#333'};">
-                        ${i === 0 ? '🏆 最近分店：' : ''}${s.name} 
-                        <span style="font-size: 0.9rem; color: #666;">(約 ${s.dist.toFixed(1)} km)</span>
-                    </div>
-                    <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <a href="tel:${s.phone}" style="flex: 1; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">📞 撥電話</a>
-                        <a href="${googleMapUrl}" target="_blank" style="flex: 1; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
-                    </div>
-                </div>`;
-            });
+// 檢查這間店是否有運費資料，有的話才顯示按鈕（或者全部顯示，沒資料時會跳提示）
+    const feeBtn = `<button onclick="showFeeDetail('${s.name}')" style="flex: 1; padding: 12px; background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer;">💰 跨區費</button>`;
+
+    htmlOutput += `
+    <div style="padding: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${i === 0 ? '#1a73e8' : '#eee'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <div style="font-weight:bold; font-size: 1.1rem; color:${i === 0 ? '#1a73e8' : '#333'};">
+            ${i === 0 ? '🏆 最近分店：' : ''}${s.name} 
+            <span style="font-size: 0.9rem; color: #666;">(約 ${s.dist.toFixed(1)} km)</span>
+        </div>
+        <div style="font-size: 14px; color: #666; margin: 8px 0;">📍 ${s.addr}</div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+            <a href="tel:${s.phone}" style="flex: 1; min-width: 80px; text-align: center; padding: 12px; background: #34a853; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">📞 撥電話</a>
+            <a href="${googleMapUrl}" target="_blank" style="flex: 1; min-width: 80px; text-align: center; padding: 12px; background: #1a73e8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">🗺️ 導航</a>
+            ${feeBtn}
+        </div>
+    </div>`;
+});
             resDiv.innerHTML = htmlOutput + '</div>';
         } else {
             resDiv.innerHTML = "<p style='color:#d93025; font-weight:bold; padding: 10px;'>❌ 找不到該地址，請試著輸入「縣市+鄉鎮名」即可。</p>";
@@ -1990,6 +1994,7 @@ function showQrCode(url, title, hint) {
 </div>
 </body>
 </html>
+
 
 
 
