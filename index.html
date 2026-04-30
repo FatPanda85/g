@@ -12,7 +12,7 @@
        --primary: #007AFF;          /* 標準藍 */
         --tax-color: #28a745;        /* 退稅綠 */
         --old-color: #fd7e14;        /* 補助橘 */
-        --price-color: #ff3b30;      /* 金額紅 */
+        --text-red: #ff3b30;      /* 金額紅 */
         --barcode-color: #34495e;    /* 深藍灰 */
         --model-blue: #0056b3;       /* 型號深藍 */
         --date-orange: #d35400;      /* 日期磚橘 */
@@ -95,7 +95,7 @@
     .gift-info { flex-grow: 1; min-width: 0; }
     .gift-info h4 { margin: 0 0 6px 0; color: #1d1d1f; font-size: 1.05rem; line-height: 1.4; }
     .gift-info p { margin: 0; font-size: 0.88rem; color: #666; line-height: 1.6; }
-    .price-red { color: var(--price-color); font-weight: 600; }
+    .price-red { color: var(--text-red); font-weight: 600; }
 
     /* 按鈕區塊 - 核心修改：確保多條碼能自動換行並美化 */
     .action-btns { 
@@ -187,7 +187,7 @@
     .text-blue { color: var(--primary) !important; font-weight: bold; }      /* 標準藍 */
     .text-green { color: var(--tax-color) !important; font-weight: bold; }    /* 退稅綠 */
     .text-orange { color: var(--old-color) !important; font-weight: bold; }   /* 補助亮橘 */
-    .text-red { color: var(--price-color) !important; font-weight: bold; }    /* 金額紅 */
+    .text-red { color: var(--text-red) !important; font-weight: bold; }    /* 金額紅 */
 
     /* 2. 進階標註色系 */
     .text-dark { color: var(--barcode-color) !important; }                    /* 深藍灰 (適合小字) */
@@ -1563,7 +1563,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "國際", 
                 name: "((贈)2026國際F-S14KM 14吋DC電風扇\n<span class='text-blue'>40-630019-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4717523402643"],
                 img: "S14KM.jpg",
                 qrUrl: "", 
@@ -1573,7 +1573,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "國際", 
                 name: "((贈)2026國際IH電磁爐KY-T30\n<span class='text-blue'>40-630047-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4717523475029"],
                 img: "T30.jpg",
                 taxUrl: "https://www.etax.nat.gov.tw/etwmain/etw210w/cases/services/OLFCDT01/0", 
@@ -1582,7 +1582,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "國際", 
                 name: "((贈)2026國際氣炸鍋NF-HC100\n<span class='text-blue'>40-630995-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4550719165225"],
                 img: "HC100.jpg",
                 qrUrl: "", 
@@ -1592,7 +1592,7 @@ async function calculateNearest() {
            { 
                 cat: "冷氣", brand: "國際", 
                 name: "((贈)2026國際露營摺疊車CW-SP2602\n<span class='text-blue'>40-630996-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4715754026027"],
                 img: "SP2602.jpg",
                 qrUrl: "", 
@@ -1602,7 +1602,7 @@ async function calculateNearest() {
              { 
                 cat: "冷氣", brand: "國際", 
                 name: "((贈)2026國際保溫瓶組CW-SP2601\n<span class='text-blue'>40-630998-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4713112091113"],
                 img: "SP2601.jpg",
                 qrUrl: "", 
@@ -1612,7 +1612,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "國際", 
                 name: "((贈)2026國際製麵包機SD-PD100\n<span class='text-blue'>40-630999-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n國際全系列冷氣2.2KW(含)以上好禮六選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4717523730135"],
                 img: "PD100.jpg",
                 qrUrl: "", 
@@ -1639,7 +1639,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026日立飛利浦HD4988黑晶爐\n<span class='text-blue'>40-630015-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
                 barcode:  ["4719386009571"],
                 img: "HD4988.jpg",
                 qrUrl: "", 
@@ -1649,7 +1649,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026伊萊克斯E7GK1-73BP電茶壺\n<span class='text-blue'>40-630038-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
                 barcode:  ["7332543752751"],
                 img: "73BP.jpg",
                 qrUrl: "", 
@@ -1659,7 +1659,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026日立-日象ERTOP12電鍋\n<span class='text-blue'>40-630041-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
                 barcode:  ["4717154111884"],
                 img: "TOP12.jpg",
                 qrUrl: "", 
@@ -1669,7 +1669,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026日立哈根諾克HGN168DC電風扇\n<span class='text-blue'>40-630921-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
                 barcode:  ["4713780039202"],
                 img: "168DC.jpg",
                 qrUrl: "", 
@@ -1679,7 +1679,7 @@ async function calculateNearest() {
              { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026日立微波爐HMRM2003\n<span class='text-blue'>40-630084-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立2.2KW(含)以上一級變頻冷氣機種\n享原廠好禮五選一\n(一對多機種以室外機計算)\n<span class='text-red'>(不含吸塵器及虎牌電子鍋)</span>\n過會員結帳碰扣", 
                 barcode:  ["8850207800062"],
                 img: "HMRM2003.jpg",
                 qrUrl: "", 
@@ -1689,7 +1689,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026日立吸塵器PVX90PMRE\n<span class='text-blue'>40-630085-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立6.3KW(含)以上一級變頻冷氣機種\n享原廠好禮七選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立6.3KW(含)以上一級變頻冷氣機種\n享原廠好禮七選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["8850207112103"],
                 img: "PVX90PMRE.jpg",
                 qrUrl: "", 
@@ -1699,7 +1699,7 @@ async function calculateNearest() {
             { 
                 cat: "冷氣", brand: "日立", 
                 name: "((贈)2026日立虎牌JBXB10電子鍋\n<span class='text-blue'>40-630060-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立6.3KW(含)以上一級變頻冷氣機種\n享原廠好禮七選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n日立6.3KW(含)以上一級變頻冷氣機種\n享原廠好禮七選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode:  ["4904710425046"],
                 img: "JBXB10.jpg",
                 qrUrl: "", 
@@ -1753,7 +1753,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "禾聯", 
                 name:"((贈)2026禾聯HDF-16CH510 16吋DC風扇\n<span class='text-blue'>40-630012-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4711229593711"], 
                 img: "16CH510.jpg",
                 qrUrl: "", 
@@ -1763,7 +1763,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "禾聯", 
                 name: "(贈)2026 禾聯 HVC-18PV050無線手持吸塵器 \n<span class='text-blue'>40-630021-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4711460501926"], 
                 img: "18PV050.jpg", 
                 qrUrl: "", 
@@ -1773,7 +1773,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "禾聯", 
                 name: "(贈)2026禾聯HMO-20MD01T 20L轉盤式微波爐 \n<span class='text-blue'>40-630030-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>  \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>  \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4711460501865"], 
                 img: "20WL.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1783,7 +1783,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "禾聯", 
                 name: "禾聯MAB-A01T1網路機上盒 \n<span class='text-blue'>40-630023-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4710273766416"], 
                 img: "A01T1.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1793,7 +1793,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "禾聯", 
                 name: "2025(贈)SCZS-115全不鏽鋼電鍋 \n<span class='text-blue'>40-630992-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 禾聯早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮五選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4710273765198"], 
                 img: "SCZS-115.jpg", 
                 qrUrl: "", 
@@ -1810,7 +1810,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "東元", 
                 name: "(贈)2026東元YB1003CB氣炸烤箱 \n<span class='text-blue'>40-630003-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>\n 東元早販冷氣活動2.8kw(含)以上一級變頻冷氣機種好禮送\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>\n 東元早販冷氣活動2.8kw(含)以上一級變頻冷氣機種好禮送\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4718074434565"], 
                 img: "YB1003.jpg", 
                 qrUrl: "", 
@@ -1827,7 +1827,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "SHARP", 
                 name: "(贈)2026山田YBH-12QN060吹風機 \n<span class='text-blue'>40-630987-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>\n 東元早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮四選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>\n 東元早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮四選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4711460502879"], 
                 img: "12QN.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1837,7 +1837,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "SHARP", 
                 name: "(贈)2026山田YWD-06LCM1E迷你順熱開 \n<span class='text-blue'>40-630016-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>\n 東元早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮四選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>\n 東元早販冷氣活動2.3kw(含)以上一級變頻冷氣機種  \n 享原廠好禮四選一\n(一對多機種以室外機計算)\n過會員結帳碰扣", 
                 barcode: ["4710273766683"], 
                 img: "06LC.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1854,7 +1854,7 @@ async function calculateNearest() {
                         {
                 cat: "冷氣", brand: "富士通", 
                 name: "(贈)2026品諾DF-1609DR 16吋直流四季DC扇 \n<span class='text-blue'>40-630007-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n全系列好禮三選一", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n全系列好禮三選一", 
                 barcode: ["4710859912343"], 
                 img: "1609DR.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1864,7 +1864,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "富士通", 
                 name: "(贈)2026象印CK-DAF10-AD快煮電氣壺 \n<span class='text-blue'>40-630027-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>\n 全系列好禮三選一", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>\n 全系列好禮三選一", 
                 barcode: ["4974305716897"], 
                 img: "DAF10.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1874,7 +1874,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "富士通", 
                 name: "(贈)2026品諾DX-5509MB氣炸鍋 \n<span class='text-blue'>40-630082-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 全系列好禮三選一", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 全系列好禮三選一", 
                 barcode: ["4710859912367"], 
                 img: "5509MB.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
                 qrUrl: "", 
@@ -1901,7 +1901,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "三菱重工", 
                 name: "(贈)2026 HX2421/02飛利浦音波牙刷 \n<span class='text-blue'>40-630014-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列1-1變頻分離冷氣享好禮三選一\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對一贈品為電動牙刷/16吋電風扇/負離子吹風機", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列1-1變頻分離冷氣享好禮三選一\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對一贈品為電動牙刷/16吋電風扇/負離子吹風機", 
                 barcode: ["8710103968795"], 
                 img: "2421.jpg", 
                 qrUrl: "", 
@@ -1911,7 +1911,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "三菱重工", 
                 name: "(贈)2026 三菱 TD760TW負離子吹風機 \n<span class='text-blue'>40-630037-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列1-1變頻分離冷氣享好禮三選一\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對一贈品為電動牙刷/16吋電風扇/負離子吹風機", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列1-1變頻分離冷氣享好禮三選一\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對一贈品為電動牙刷/16吋電風扇/負離子吹風機", 
                 barcode: ["4711216461535"], 
                 img: "TD760TW.jpg", 
                 qrUrl: "", 
@@ -1921,7 +1921,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "三菱重工", 
                 name: "(贈)2026 VESTA 16吋遙控DC風扇 \n<span class='text-blue'>40-630071-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span>\n 三菱全系列1-1變頻分離冷氣享好禮三選一\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對一贈品為電動牙刷/16吋電風扇/負離子吹風機", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span>\n 三菱全系列1-1變頻分離冷氣享好禮三選一\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對一贈品為電動牙刷/16吋電風扇/負離子吹風機", 
                 barcode: ["4711216460538"], 
                 img: "DC1601.jpg", 
                 qrUrl: "", 
@@ -1931,7 +1931,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "三菱重工", 
                 name: "(贈)2026 三菱 ES301-BK除氯蓮蓬頭 \n<span class='text-blue'>40-630029-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列一對多變頻分離冷氣享好禮三選一(以室外機數量計算)\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對多贈品為護眼樂/象印電子鍋/除氯蓮蓬頭", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列一對多變頻分離冷氣享好禮三選一(以室外機數量計算)\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對多贈品為護眼樂/象印電子鍋/除氯蓮蓬頭", 
                 barcode: ["4962752008818"], 
                 img: "ES301.jpg", 
                 qrUrl: "", 
@@ -1941,7 +1941,7 @@ async function calculateNearest() {
             {
                 cat: "冷氣", brand: "三菱重工", 
                 name: "(贈)2026 三菱 OS-1251護眼樂Air 2 \n<span class='text-blue'>40-630032-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列一對多變頻分離冷氣享好禮三選一(以室外機數量計算)\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對多贈品為護眼樂/象印電子鍋/除氯蓮蓬頭", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列一對多變頻分離冷氣享好禮三選一(以室外機數量計算)\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對多贈品為護眼樂/象印電子鍋/除氯蓮蓬頭", 
                 barcode: ["8888657167480"], 
                 img: "1251.jpg", 
                 qrUrl: "", 
@@ -1951,7 +1951,7 @@ async function calculateNearest() {
              {
                 cat: "冷氣", brand: "三菱重工", 
                 name: "(贈)2026 象印S-WAF10 6人份電子鍋 \n<span class='text-blue'>40-630074-001</span>", 
-                desc: "2026/5/1 延長送贈品\n<span class='price-color'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列一對多變頻分離冷氣享好禮三選一(以室外機數量計算)\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對多贈品為護眼樂/象印電子鍋/除氯蓮蓬頭", 
+                desc: "2026/5/1 延長送贈品\n<span class='text-red'>注意後勤備註\n送完為主，請勿超訂</span> \n 三菱全系列一對多變頻分離冷氣享好禮三選一(以室外機數量計算)\n<span class='text-red'>一對一和一對多送的贈品不同</span>\n一對多贈品為護眼樂/象印電子鍋/除氯蓮蓬頭", 
                 barcode: ["4711216460972"], 
                 img: "WAF10.jpg", 
                 qrUrl: "", 
