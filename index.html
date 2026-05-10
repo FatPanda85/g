@@ -2612,6 +2612,35 @@ function renderGifts(data) {
                     const commonLabels = ["🧾 主條碼", "🚚 免運", "💰 收費"];
                     label = commonLabels[i] || label;
                 }
+               // 3. 這裡可以無限增加您的新分類 (例如：生活小家電)
+                   else if (g.cat === "聲寶") {
+                    const lifeLabels = ["🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+                    label = lifeLabels[i] || label;
+                    }
+                   else if (g.cat === "DM0506-0519") {
+                    const lifeLabels = ["🎁 贈品", "➖ 品牌負載","🚚 免運$10", "💰 收費$10"];
+                    label = lifeLabels[i] || label;
+                    }
+                   else if (g.cat === "SAMSUNG*0508-0517*") {
+                    const lifeLabels = ["🎁 贈品", "➖ 品牌負載","🎧 加碼贈品", "🎧 加碼贈品", "🚚 免運$10", "💰 收費$10"];
+                    label = lifeLabels[i] || label;
+                    }
+                    if (g.cat === "國際夏日有禮賞") {
+                    if (g.brand && g.brand.includes("台灣製熱泵滾筒洗衣機")) {
+                   const labels = ["🎁 贈品", "🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+                   label = labels[i] || label;
+                  } else if (g.brand === "淨護完美洗烘衣機組") {
+                 const labels = ["🎁 贈品", "🎁 贈品", "🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+                 label = labels[i] || label;
+                } else if (g.brand === "變頻溫水滾筒和直立洗衣機") { // 注意：這裡原本寫錯了
+                const labels = ["🎁 贈品", "🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+                label = labels[i] || label;
+                } else {
+           // 其他不屬於上述品牌的「國際夏日有禮賞」項目
+            const generalLabels = ["🎁 贈品", "🚚 免運$10", "💰 收費$10"];
+            label = generalLabels[i] || label;
+    }
+}
 
                 barcodeBtns += `<button class="action-btn btn-barcode" onclick="zoomBarcode('${code}')">${label}</button>`;
             });
