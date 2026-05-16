@@ -2711,6 +2711,7 @@ function renderGifts(data) {
                     // 【防呆修正】如果沒有設定特製型態，一律強制走之前你最喜歡的經典黑色底、白色字樣式！
                     customStyle = 'style="background-color: #374151 !important; color: white !important;"'; 
                 }
+                  
 
                 // 套用回帶有圓角跟微陰影的基礎 action-btn 類別
                 barcodeBtns += `<button class="action-btn" ${customStyle} onclick="zoomBarcode('${code}')">${label}</button>`;
