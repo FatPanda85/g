@@ -2093,6 +2093,7 @@ async function calculateNearest() {
                 cat: "日立藝思生活節", brand: "日立", 
                 name: "買指定機型冰箱送  \n <span class='text-blue'>40-004136-001</span> \n  (贈)康寧餐具輕瓷保溫/冰吸管杯SN-BZ850DP", 
                 desc: "2026/4/1 ~ 2026/7/31 \n(申請截止日2026/8/31) \n 兩門變頻冰箱  \n <span class='text-blue'>HRTN5275MF、HRTN5255MF\nRVX429、RV469</span>\n這四款可贈送", 
+                type: "gift", 
                 img: "air.jpg", 
                  barcode: ["8888236196603"], 
                 img: "ZX14.jpg", // 請確保 GitHub 上檔案名為 ka10r.jpg (小寫)
@@ -2154,6 +2155,7 @@ async function calculateNearest() {
                 cat: "日立藝思生活節", brand: "日立", 
                 name: "49-400006-001\n冰箱免費運費$10", 
                 desc: "100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+                type: "shipping1"
                 barcode: ["2449400006027"], // 請換成正確條碼
                 img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
             },
@@ -2161,6 +2163,7 @@ async function calculateNearest() {
                 cat: "日立藝思生活節", brand: "日立", 
                 name: "49-400002-001\n冰箱收費運費$10", 
                 desc: "100公升以下$200\n101-199公升$250\n200-299公升$300\n300-399公升$450\n400-499公升$500\n600公升以上$900\n對開冰箱$1200\nLG敲敲看冰箱$1500\n電子衣櫥$600\n1.拆大門/室內門/過窗$200\n2.拆冰箱門$1500/門\n3.冰箱過扶手$300\n4.對開冰箱過扶手$500", 
+                type: "shipping2",
                 barcode: ["2449400002029"], // 請換成正確條碼
                 img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
             },
@@ -2168,6 +2171,7 @@ async function calculateNearest() {
                 cat: "日立藝思生活節", brand: "日立", 
                 name: "49-401006-001\n洗衣機免費運費$10", 
                 desc: "12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/市內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+                type: "shipping1"
                 barcode: ["2449401006026"], // 請換成正確條碼
                 img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
             },
@@ -2175,6 +2179,7 @@ async function calculateNearest() {
                 cat: "日立藝思生活節", brand: "日立", 
                 name: "49-401002-001\n洗衣機收費運費$10", 
                 desc: "12公斤(含)以下$300\n13-18公斤$400\n19公斤以上$500\nLG上乾下洗$2700\n滾筒洗衣機12公斤(含)以下$600\n滾筒洗衣機13-16公斤$700\n滾筒洗衣機17公斤以上$750\nLG下洗迷你洗衣機$300\n乾衣機10公斤$250\n乾衣機11公斤以上$300\n免曬衣乾衣機$500\n1.拆大門/市內門/過窗$200\n2.直立式洗衣機過扶手$300\n3.滾筒洗衣機過扶手$500\n國際上下洗運費$2000", 
+                type: "shipping2",
                 barcode: ["2449401002028"], // 請換成正確條碼
                 img: "", qrUrl: "", taxUrl: "", oldUrl: "" 
             },
@@ -2696,7 +2701,13 @@ function renderGifts(data) {
                 } else if (g.type === 'shipping') {
                     label = "🚚 免運$100";
                     customStyle = 'style="background-color: #374151 !important; color: white !important;"'; // 強制免運黑
-                } else {
+                } else if (g.type === 'shipping1') {
+                    label = "🚚 免運$10";
+                    customStyle = 'style="background-color: #374151 !important; color: white !important;"'; // 強制免運黑
+                } else if (g.type === 'shipping2') {
+                    label = "🚚 收費$10";
+                    customStyle = 'style="background-color: #374151 !important; color: white !important;"'; // 強制免運黑
+                }else {
                     // 【防呆修正】如果沒有設定特製型態，一律強制走之前你最喜歡的經典黑色底、白色字樣式！
                     customStyle = 'style="background-color: #374151 !important; color: white !important;"'; 
                 }
